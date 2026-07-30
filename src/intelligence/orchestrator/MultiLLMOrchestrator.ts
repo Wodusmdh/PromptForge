@@ -98,7 +98,14 @@ export class MultiLLMOrchestrator {
     }
 
     // Cost tracking would happen here dynamically
-    const result = await provider.generateText(modelId, prompt);
+    const response = await provider.executeRequest({ prompt, modelId });
+    // Cost tracking would happen here dynamically using response.usage
+    const inputTokens = response.usage?.inputTokens || 0;
+    const outputTokens = response.usage?.outputTokens || 0;
+    const simulatedCost = (inputTokens / 1000) * model.costPer1kInput + (outputTokens / 1000) * model.costPer1kOutput;
+    this.currentBudget += simulatedCost || 0.001; // fallback
+    run.budgetConsumed = this.currentBudget;
+    return response.text;
     return result;
   }
 }

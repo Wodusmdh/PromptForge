@@ -8,11 +8,12 @@ import { BenchmarkView } from "./components/preview/BenchmarkView";
 import { RuleExplorer } from "./components/rules/RuleExplorer";
 import { HistoryPanel } from "./components/history/HistoryPanel";
 import { ModelOrchestratorPanel } from "../components/ModelOrchestratorPanel";
-import { Menu, X, Hammer, BookOpen, Clock, Settings, PanelRightClose, PanelRightOpen, Terminal, Network } from "lucide-react";
+import { GitHubWorkspace } from "../components/github/GitHubWorkspace";
+import { Menu, X, Hammer, BookOpen, Clock, Settings, PanelRightClose, PanelRightOpen, Terminal, Network, Github } from "lucide-react";
 
 export function Playground() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'editor' | 'rules' | 'history' | 'orchestrator'>('editor');
+  const [activeTab, setActiveTab] = useState<'editor' | 'rules' | 'history' | 'orchestrator' | 'github'>('editor');
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
 
   return (
@@ -80,6 +81,12 @@ export function Playground() {
               active={activeTab === 'orchestrator'} 
               onClick={() => { setActiveTab('orchestrator'); setMobileMenuOpen(false); }} 
             />
+            <NavItem 
+              icon={<Github />} 
+              label="GitHub" 
+              active={activeTab === 'github'} 
+              onClick={() => { setActiveTab('github'); setMobileMenuOpen(false); }} 
+            />
           </nav>
           
           <div className="p-4 md:px-2 lg:px-4 border-t border-[#21262D]">
@@ -108,6 +115,9 @@ export function Playground() {
                 </div>
                 <div className={`${activeTab === 'orchestrator' ? 'flex flex-col flex-1' : 'hidden'}`}>
                   <ModelOrchestratorPanel />
+                </div>
+                <div className={`${activeTab === 'github' ? 'flex flex-col flex-1 h-full' : 'hidden'}`}>
+                  <GitHubWorkspace />
                 </div>
               </div>
             </div>

@@ -85,3 +85,52 @@ export interface OrchestrationRun {
   result: any | null;
   warnings: string[];
 }
+
+
+export interface NormalizedRequest {
+  prompt: string;
+  systemInstruction?: string;
+  modelId: string;
+  temperature?: number;
+  maxOutputTokens?: number;
+  streaming?: boolean;
+  history?: Array<{ role: 'user' | 'assistant', content: string }>;
+  abortSignal?: AbortSignal;
+}
+
+export interface NormalizedResponse {
+  text: string;
+  provider: AIProviderName;
+  model: string;
+  usage?: {
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
+  };
+  latencyMs?: number;
+  finishReason?: string;
+  warnings?: string[];
+}
+
+export type NormalizedErrorCategory = 
+  | "AUTHENTICATION_ERROR"
+  | "INVALID_REQUEST"
+  | "RATE_LIMITED"
+  | "CONTEXT_LIMIT"
+  | "PROVIDER_UNAVAILABLE"
+  | "TIMEOUT"
+  | "NETWORK_ERROR"
+  | "UNSUPPORTED_CAPABILITY"
+  | "UNKNOWN_PROVIDER_ERROR";
+
+export class ProviderError extends Error {
+  constructor(
+    public category: NormalizedErrorCategory,
+    public provider: AIProviderName,
+    public originalError?: any,
+    message?: string
+  ) {
+    super(message || `${category} from ${provider}`);
+    this.name = 'ProviderError';
+  }
+}
