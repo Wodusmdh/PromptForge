@@ -105,7 +105,7 @@ export class PromptController {
   async optimize(req: Request, res: Response) {
     try {
       let promptToOptimize = currentSession.prompt;
-      if (req.body.compiledPrompt) promptToOptimize = req.body.compiledPrompt;
+      if (req.body.compiledPrompt !== undefined) promptToOptimize = req.body.compiledPrompt;
 
       if (!promptToOptimize) {
          return res.status(400).json({ status: "error", code: "VALIDATION_ERROR", error: "No compiled prompt provided." });
@@ -136,7 +136,7 @@ export class PromptController {
   async analyze(req: Request, res: Response) {
     try {
       let promptToAnalyze = currentSession.prompt;
-      if (req.body.compiledPrompt) promptToAnalyze = req.body.compiledPrompt;
+      if (req.body.compiledPrompt !== undefined) promptToAnalyze = req.body.compiledPrompt;
 
       if (!promptToAnalyze) {
          return res.status(400).json({ status: "error", code: "VALIDATION_ERROR", error: "No compiled prompt provided." });
@@ -164,9 +164,9 @@ export class PromptController {
       let planToValidate = currentSession.plan;
       let rulesToValidate = currentSession.rules;
 
-      if (req.body.compiledPrompt) promptToValidate = req.body.compiledPrompt;
-      if (req.body.plan) planToValidate = req.body.plan;
-      if (req.body.rules) rulesToValidate = req.body.rules;
+      if (req.body.compiledPrompt !== undefined) promptToValidate = req.body.compiledPrompt;
+      if (req.body.plan !== undefined) planToValidate = req.body.plan;
+      if (req.body.rules !== undefined) rulesToValidate = req.body.rules;
 
       if (!promptToValidate || !planToValidate || !rulesToValidate) {
          return res.status(400).json({ status: "error", code: "VALIDATION_ERROR", error: "No compiled prompt, plan, or rules provided." });

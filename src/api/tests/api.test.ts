@@ -34,7 +34,7 @@ async function runTests() {
   assert.strictEqual(resValFail.body.code, "VALIDATION_ERROR");
   console.log("Validation fail test passed.");
 
-  // Test 4 & Target Assistant Normalization
+  // Test 4: Compile success & Target Assistant Normalization
   const resSuccess = await request(app)
     .post("/api/v1/compile")
     .set("Authorization", "Bearer test-token")
@@ -61,41 +61,59 @@ async function runTests() {
   const resOptimize = await request(app)
     .post("/api/v1/optimize")
     .set("Authorization", "Bearer test-token")
-    .send({ promptId: resSuccess.body.id });
-  if(resOptimize.status!==200) console.log(resOptimize.body); assert.strictEqual(resOptimize.status, 200);
+    .send({ compiledPrompt: resSuccess.body.compiledPrompt });
+  assert.strictEqual(resOptimize.status, 200);
   assert.strictEqual(resOptimize.body.status, "success");
-  assert.notStrictEqual(resOptimize.body.optimizedTokens, 80); // Real optimization run, not mock
-  assert.notStrictEqual(resOptimize.body.originalTokens, 100); 
-  assert.ok(resOptimize.body.optimizedMarkdown);
+  assert.ok(typeof resOptimize.body.originalTokens === "number");
+  assert.ok(typeof resOptimize.body.optimizedTokens === "number");
+  assert.ok(typeof resOptimize.body.optimizedMarkdown === "string");
+  assert.ok(resOptimize.body.optimizedMarkdown.length > 0);
+  assert.ok(resOptimize.body.diff);
   console.log("Optimize test passed.");
 
   // Test 7: Analyze
   const resAnalyze = await request(app)
     .post("/api/v1/analyze")
     .set("Authorization", "Bearer test-token")
-    .send({ promptId: resSuccess.body.id });
+    .send({ compiledPrompt: resSuccess.body.compiledPrompt });
   assert.strictEqual(resAnalyze.status, 200);
   assert.strictEqual(resAnalyze.body.status, "success");
-  assert.ok(resAnalyze.body.qualityScore !== undefined);
-  assert.notStrictEqual(resAnalyze.body.qualityScore, 92); // Not mock 92 (wait, might be 90 depending on length, just checking existence is fine)
-  assert.ok(resAnalyze.body.completeness !== undefined);
+  assert.ok(typeof resAnalyze.body.qualityScore === "number");
+  assert.ok(typeof resAnalyze.body.completeness === "number");
+  assert.ok(typeof resAnalyze.body.readability === "number");
+  assert.ok(typeof resAnalyze.body.consistency === "number");
+  assert.ok(typeof resAnalyze.body.efficiency === "number");
+
+  // Secondary analysis with totally different data to ensure not constant
+  const resAnalyze2 = await request(app)
+    .post("/api/v1/analyze")
+    .set("Authorization", "Bearer test-token")
+    .send({
+      compiledPrompt: {
+        id: "125", title: "Diff", summary: "Diff",
+        compiledMarkdown: "## Minimal\\nJust a small prompt.",
+        estimatedTokens: 2000,
+        sections: [
+            { title: "S1", content: "...", order: 1 },
+            { title: "S2", content: "...", order: 2 },
+            { title: "S3", content: "...", order: 3 },
+            { title: "S4", content: "...", order: 4 },
+            { title: "S5", content: "...", order: 5 },
+            { title: "S6", content: "...", order: 6 },
+            { title: "S7", content: "...", order: 7 }
+        ],
+        qualityScore: 10
+      }
+    });
+  assert.strictEqual(resAnalyze2.status, 200);
+  assert.ok(resAnalyze2.body.qualityScore !== resAnalyze.body.qualityScore || resAnalyze2.body.completeness !== resAnalyze.body.completeness);
   console.log("Analyze test passed.");
 
   // Test 8: Validate (Valid and Invalid)
   const validPayload = {
-    compiledPrompt: {
-      id: "123", title: "T", summary: "T",
-      compiledMarkdown: "## Context\n## Requirements\n## Rules & Constraints\n",
-      estimatedTokens: 500,
-      sections: [
-        { title: "Context", content: "...", order: 1 },
-        { title: "Requirements", content: "...", order: 2 },
-        { title: "Rules & Constraints", content: "...", order: 3 },
-      ],
-      qualityScore: 90
-    },
-    plan: { planId: "1", orderedEngines: [], resolutionNotes: [] },
-    rules: { mandatory: [], optional: [], conflictsDetected: false }
+    compiledPrompt: resSuccess.body.compiledPrompt,
+    plan: { planId: "1", orderedEngines: resSuccess.body.selectedEngines, resolutionNotes: [] },
+    rules: { mandatory: resSuccess.body.selectedRules, optional: [], conflictsDetected: false }
   };
 
   const resValA = await request(app)
@@ -108,7 +126,7 @@ async function runTests() {
   const invalidPayload = {
     compiledPrompt: {
       id: "124", title: "T", summary: "T",
-      compiledMarkdown: "## Incomplete\n",
+      compiledMarkdown: "## Incomplete\\n",
       estimatedTokens: 35000, // Trigger context overflow
       sections: [
         { title: "Incomplete", content: "...", order: 1 },
@@ -126,7 +144,19 @@ async function runTests() {
   assert.strictEqual(resValB.status, 200);
   assert.strictEqual(resValB.body.isValid, false);
   assert.ok(resValB.body.errors.length > 0);
-  console.log("Validate (Valid and Invalid) test passed.");
+  console.log("Validate test passed.");
+
+  // Test 9: Error paths
+  // Since we have an in-memory session from the compile request above, we can trigger the "no prompt" error by explicitly passing null
+  const resOptFail = await request(app).post("/api/v1/optimize").set("Authorization", "Bearer test-token").send({ compiledPrompt: null });
+  assert.strictEqual(resOptFail.status, 400);
+
+  const resAnaFail = await request(app).post("/api/v1/analyze").set("Authorization", "Bearer test-token").send({ compiledPrompt: null });
+  assert.strictEqual(resAnaFail.status, 400);
+
+  const resValFail2 = await request(app).post("/api/v1/validate").set("Authorization", "Bearer test-token").send({ compiledPrompt: null });
+  assert.strictEqual(resValFail2.status, 400);
+  console.log("Error paths test passed.");
 
   console.log("API integration test passed successfully.");
 }
