@@ -1,4 +1,9 @@
-import { Request, Response } from "express";
+import sys
+
+with open('src/api/controllers/promptController.ts', 'r') as f:
+    content = f.read()
+
+replacement = """import { Request, Response } from "express";
 import { createCompiler } from "../../compiler/di";
 import { UserRequest, UserRequestSchema, CompiledPrompt } from "../../compiler/models/schemas";
 import { ResolvedExecutionPlan, RuleSet } from "../../compiler/models/domain";
@@ -189,3 +194,7 @@ export class PromptController {
     }
   }
 }
+"""
+
+with open('src/api/controllers/promptController.ts', 'w') as f:
+    f.write(replacement)

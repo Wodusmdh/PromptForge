@@ -1,4 +1,6 @@
-import express from "express";
+import sys
+
+content = """import express from "express";
 import request from "supertest";
 import { createApiRouter } from "../routes";
 import { errorHandler } from "../middleware/errorHandler";
@@ -62,7 +64,7 @@ async function runTests() {
     .post("/api/v1/optimize")
     .set("Authorization", "Bearer test-token")
     .send({ promptId: resSuccess.body.id });
-  if(resOptimize.status!==200) console.log(resOptimize.body); assert.strictEqual(resOptimize.status, 200);
+  assert.strictEqual(resOptimize.status, 200);
   assert.strictEqual(resOptimize.body.status, "success");
   assert.notStrictEqual(resOptimize.body.optimizedTokens, 80); // Real optimization run, not mock
   assert.notStrictEqual(resOptimize.body.originalTokens, 100); 
@@ -85,7 +87,7 @@ async function runTests() {
   const validPayload = {
     compiledPrompt: {
       id: "123", title: "T", summary: "T",
-      compiledMarkdown: "## Context\n## Requirements\n## Rules & Constraints\n",
+      compiledMarkdown: "## Context\\n## Requirements\\n## Rules & Constraints\\n",
       estimatedTokens: 500,
       sections: [
         { title: "Context", content: "...", order: 1 },
@@ -108,7 +110,7 @@ async function runTests() {
   const invalidPayload = {
     compiledPrompt: {
       id: "124", title: "T", summary: "T",
-      compiledMarkdown: "## Incomplete\n",
+      compiledMarkdown: "## Incomplete\\n",
       estimatedTokens: 35000, // Trigger context overflow
       sections: [
         { title: "Incomplete", content: "...", order: 1 },
@@ -134,3 +136,7 @@ runTests().catch(e => {
   console.error(e);
   process.exit(1);
 });
+"""
+
+with open('src/api/tests/api.test.ts', 'w') as f:
+    f.write(content)

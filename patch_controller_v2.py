@@ -1,9 +1,13 @@
-import { Request, Response } from "express";
+import sys
+
+with open('src/api/controllers/promptController.ts', 'r') as f:
+    content = f.read()
+
+replacement = """import { Request, Response } from "express";
 import { createCompiler } from "../../compiler/di";
 import { UserRequest, UserRequestSchema, CompiledPrompt } from "../../compiler/models/schemas";
 import { ResolvedExecutionPlan, RuleSet } from "../../compiler/models/domain";
 import { PromptCompressor } from "../../optimization/compressor/compressor";
-import { RedundancyDetector } from "../../optimization/compressor/redundancyDetector";
 import { ContextOptimizer } from "../../optimization/core/contextOptimizer";
 import { PromptQualityAnalyzer } from "../../optimization/analyzer/qualityAnalyzer";
 import { SemanticPreservationVerifier } from "../../optimization/preservation/semanticPreservation";
@@ -111,8 +115,7 @@ export class PromptController {
          return res.status(400).json({ status: "error", code: "VALIDATION_ERROR", error: "No compiled prompt provided." });
       }
 
-      const redundancyDetector = new RedundancyDetector();
-      const compressor = new PromptCompressor(redundancyDetector);
+      const compressor = new PromptCompressor();
       const contextOptimizer = new ContextOptimizer();
       const qualityAnalyzer = new PromptQualityAnalyzer();
       const verifier = new SemanticPreservationVerifier();
@@ -189,3 +192,7 @@ export class PromptController {
     }
   }
 }
+"""
+
+with open('src/api/controllers/promptController.ts', 'w') as f:
+    f.write(replacement)
