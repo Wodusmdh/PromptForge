@@ -1,0 +1,6 @@
+{
+  "name": "PromptForge AI",
+  "description": "AI Prompt Engineering System for AI Coding Assistants",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,40 @@
+openapi: 3.1.0
+info:
+  title: PromptForge API
+  version: 2.0.0
+  description: API for PromptForge Compiler, Runtime, and Optimization Engine.
+servers:
+  - url: https://api.promptforge.dev/v1
+paths:
+  /compile:
+    post:
+      summary: Compile a user request into a Prompt
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [idea, targetAssistant]
+              properties:
+                idea:
+                  type: string
+                targetAssistant:
+                  type: string
+      responses:
+        '200':
+          description: Successful compilation
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key

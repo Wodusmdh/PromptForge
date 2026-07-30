@@ -1,0 +1,31 @@
+--- PROMPTFORGE_SYSTEM_SPECIFICATION.md
++++ PROMPTFORGE_SYSTEM_SPECIFICATION.md
+@@ -3394,7 +3394,7 @@
+ #### 39.3 Human Approval
+ 
+-High-risk operations require explicit human approval unless the project explicitly establishes a deterministic and narrowly scoped authorization policy.
++High-risk operations must require explicit human approval unless a deterministic and narrowly scoped authorization policy has been explicitly satisfied. No high-risk operation may proceed without satisfying one of these two absolute conditions.
+ 
+ Approval must occur before the risky action, not after it.
+@@ -3424,7 +3424,7 @@
+ #### 39.6 Destructive Operations
+ 
+-Destructive operations must receive additional safeguards.
++Destructive operations must strictly enforce the authorization requirements of Section 39.3.
+ 
+ Examples:
+@@ -3435,7 +3435,7 @@
+ - mass file deletion
+ - production configuration replacement
+ 
+-The agent should identify the operation and its consequences before execution.
++The agent must explicitly identify the operation and its consequences, and secure the required authorization, prior to execution.
+ 
+ #### 39.7 Command Allowlist / Denylist
+@@ -3483,7 +3483,7 @@
+ #### 39.11 Budget Dimensions
+ 
+-Where appropriate, the global budget may include limits for:
++The global budget must include deterministic limits for:
+ - maximum wall-clock time
+ - maximum tool calls

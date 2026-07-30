@@ -1,0 +1,128 @@
+--- /app/applet/public/PROMPTFORGE_SYSTEM_SPECIFICATION.md.bak	2026-07-28 14:29:59.788493832 +0000
++++ /app/applet/public/PROMPTFORGE_SYSTEM_SPECIFICATION.md	2026-07-28 14:56:21.613575167 +0000
+@@ -104,7 +104,7 @@
+ - **Environment Management**: `.env.example` declaration, zero secrets committed to source control.
+ - **CI/CD & Monitoring**: GitHub Actions build triggers, automated linting, unit tests, health check endpoints (`/api/health`).
+ 
+-#### Engine 8: Visual Design Analysis Engine (Part 9)
++#### Engine 8: Visual Design Analysis Engine
+ - **Visual Input Processing**: Analyze UI screenshots, mobile/web app screenshots, dashboards, wireframes, hand-drawn sketches, mockups, Figma exports, whiteboard photos, flowcharts, ERD, and architecture diagrams.
+ - **Deep Design Extraction**: Evaluate overall style, layout structure, visual hierarchy, navigation patterns, spacing grid, typography pairing, color scheme, component arrangement, buttons, forms, tables, charts, animations, responsiveness, WCAG accessibility, and UX flow quality.
+ - **Design Classification**: Identify design archetypes (Minimalist, Modern, Enterprise, Glassmorphism, Neumorphism, Apple Style, Google Material, Microsoft Fluent, Tailwind Style, shadcn/ui).
+@@ -112,7 +112,7 @@
+ - **UX Improvement**: Eliminate bad UX patterns; refine spacing, contrast, navigation, readability, and mobile responsiveness.
+ - **Copyright Policy**: Never copy exact proprietary logos or trademarked artwork. Extract structural layout, typography, and spacing principles to build original, compliant designs.
+ 
+-#### Engine 9: Advanced Input & Intelligent Analysis Engine (Part 10)
++#### Engine 9: Advanced Input & Intelligent Analysis Engine
+ - **Reference Website Analysis Engine**: Professionally analyze landing pages, SaaS apps, dashboards, and developer tools. Extract visual hierarchy, form/table/card designs, and UX flows to create original, elevated design systems.
+ - **Existing Project Analysis Engine**: Audit ZIP files, git repos, and source code. Analyze tech stack, architecture, tech debt, code smells, maintainability, and security. Recommend refactoring without unnecessary rewrites while preserving existing business logic.
+ - **AI Coding Optimization Engine**: Tailor prompt structure, length, instruction style, and reasoning depth for target AI Coding Assistants (ChatGPT, Claude, Claude Code, Cursor, Windsurf, Gemini, Bolt.new, Lovable, GitHub Copilot, Cline, Roo Code, Replit AI, OpenHands).
+@@ -122,7 +122,7 @@
+ - **Conflict Resolution Engine**: Identify conflicting requirements across sources and resolve them by prioritizing Business Goals, User Experience, Scalability, Maintainability, and Security. Document resolution rationale.
+ - **Final Validation Engine**: Verify every uploaded reference has been analyzed, requirements extracted, conflicts resolved, and assumptions documented prior to final prompt output generation.
+ 
+-#### Engine 10: Intelligent Requirement Expansion Engine / IREE (Part 11)
++#### Engine 10: Intelligent Requirement Expansion Engine / IREE
+ - **Intent & Domain Discovery**: Determine project type, industry, target users, business goals, scale, platform, and primary/secondary workflows to contextualize feature recommendations.
+ - **Smart Requirement Expansion**: Identify missing features, user roles, business rules, DB entities, API endpoints, permissions, integrations, notifications, reports, security rules, edge cases, and test requirements.
+ - **Industry Knowledge Base**: Utilize domain-specific templates (e.g. School Management, E-Commerce, Hospital, Restaurant, FinTech, CRM) to recommend standard essential workflows.
+@@ -131,7 +131,7 @@
+ - **Business Rule & Option Expansion**: Infer domain business constraints (e.g., refunds cannot exceed original payment, appointment times cannot overlap) and present implementation options with pros/cons/complexity trade-offs.
+ - **Conflict Resolution & Preservation**: Identify conflicting requirements (e.g., offline-first vs mandatory real-time sync) and provide clear resolutions while strictly preserving user control and core intent.
+ 
+-#### Engine 11: Feature Pack Engine, Plugin Architecture & Smart Stack Detector (Part 12)
++#### Engine 11: Feature Pack Engine, Plugin Architecture & Smart Stack Detector
+ - **Feature Pack Engine**: Reusable industry best-practice packs (School, Hospital, LMS, E-Commerce, POS, CRM, ERP, AI SaaS, Real Estate, Food Delivery, Logistics, FinTech). Recommend features, roles, DB tables, APIs, dashboards, and security rules with user confirmation.
+ - **Plugin Architecture**: Tech-specific best practices across Frontend (React/Next/Vue/Svelte/Flutter), Backend (NestJS/Express/Laravel/FastAPI/Django), DB (PostgreSQL/MySQL/MongoDB/Supabase), Auth (JWT/Clerk/Auth0/Firebase Auth), Payments (Stripe/Midtrans/PayPal), and DevOps. Auto-detected from user tech stack selections.
+ - **Smart Stack Detector & Decision Matrix**: Evaluate traffic, scale, team size, developer experience, budget, maintenance, and security to generate a Stack Decision Matrix comparing trade-offs.
+@@ -139,46 +139,46 @@
+ - **Project Scale Detector**: Classify project scale (Small, Medium, Large, Enterprise) and prescribe corresponding architectural patterns, caching layers (Redis), background queue workers, load balancing, and CI/CD pipelines.
+ - **Final Validation & Compatibility**: Verify technology choices are compatible, feature packs match project scale, and no unnecessary complexity is introduced before generating the master prompt.
+ 
+-#### Engine 12: Dynamic Knowledge Intelligence System / DKIS (Part 13)
++#### Engine 12: Dynamic Knowledge Intelligence System / DKIS
+ - **Multi-Source Knowledge Acquisition & Synthesis**: Extract and synthesize engineering patterns from official documentation, language specifications, API references, security guidelines, WCAG standards, and maintainer release notes.
+ - **Source Trust Scoring**: Assign confidence scores to technical sources, prioritizing official documentation and long-term stable references over unverified third-party content. Resolve technical conflicts with clear rationale.
+ - **Knowledge Quality & Best Practice Extraction**: Filter out anti-patterns and low-quality practices. Extract production standards for project organization, naming conventions, validation, error handling, testing, caching, and CI/CD.
+ - **Version Awareness & Deprecation Safety**: Track framework/language versions, breaking changes, and deprecated APIs. Recommend LTS migration paths to ensure long-term system maintainability.
+ - **Technology Knowledge Packs**: Deploy specialized Knowledge Packs across popular ecosystems (Laravel, Next.js, React, Vue, Svelte, Flutter, Tailwind CSS, shadcn/ui, Prisma, Drizzle, PostgreSQL, MySQL, Redis, Docker, Supabase, Firebase, AWS, Cloudflare, Vercel).
+ 
+-#### Engine 13: Evidence-Driven Software Architecture / EDSA (Part 14)
++#### Engine 13: Evidence-Driven Software Architecture / EDSA
+ - **Explainable & Defensible Engineering**: Ensure every architectural and technology decision is backed by clear technical reasoning, evidence, and project context.
+ - **Honesty Over Hallucination**: Strictly eliminate fabricated API behaviors, false framework features, or false performance claims. Clearly document uncertainties and propose safe validation steps.
+ - **Decision Transparency & Trade-Off Analysis**: For major architectural recommendations, evaluate and disclose business goals, technical trade-offs, developer experience, scalability, security, and operational costs alongside confidence scores (Very High to Low).
+ - **Explicit Assumption & Limitation Management**: Separate confirmed user requirements from inferred requirements, assumptions, and system constraints. Document potential risks, impacts, and mitigation plans.
+ - **Senior Architect Advisory Mode**: Serve as a senior software consultant who constructively identifies technical flaws, security risks, or anti-patterns in requested designs and proposes safer, production-ready alternatives while respecting user intent.
+ 
+-#### Engine 14: Multi-Persona Review Board (Part 15)
++#### Engine 14: Multi-Persona Review Board
+ - **Multidisciplinary Review Board**: Before producing the final prompt, analyze the project through 17 specialized perspectives: Product Manager, Business Analyst, UX Researcher, UI Designer, Software Architect, Backend Architect, Frontend Architect, Database Architect, API Architect, Security Engineer, Performance Engineer, Cloud Architect, DevOps Engineer, QA Engineer, Accessibility Specialist, Technical Writer, and AI Solution Architect.
+ - **Comprehensive Quality Check**: Inspect MVP scope, business rules, edge cases, user journeys, WCAG AA compliance, OWASP top 10 security, indexing/constraints, bundle size, caching, CI/CD, backup/disaster recovery, test coverage, and AI prompt clarity/execution readiness.
+ - **Review Consolidation & Quality Gate**: Merge all discipline findings, eliminate duplicate feedback, resolve cross-role conflicts, and enforce the quality gate before generating the final master prompt.
+ 
+-#### Engine 15: Virtual AI Coding Lab / VACL (Part 17)
++#### Engine 15: Virtual AI Coding Lab / VACL
+ - **Multi-Assistant Compatibility Simulation**: Estimate how target AI Coding Assistants (ChatGPT, Claude, Claude Code, Cursor, Windsurf, Gemini, GitHub Copilot, Bolt.new, Lovable, Replit AI, OpenHands, Continue.dev, Cline, Roo Code) will interpret and execute the specification.
+ - **Compatibility Ratings & Readiness Test**: Generate confidence-based readiness ratings (Excellent to Needs Improvement) assessing instruction clarity, structural modularity, and technical completeness.
+ - **Misunderstanding & Ambiguity Detector**: Detect subjective buzzwords (e.g., "modern", "fast", "secure", "beautiful", "scalable") and automatically replace them with concrete, measurable engineering requirements.
+ - **Clarification Prediction & Robustness Check**: Identify high-friction specification areas (Authentication, Database Relations, Business Logic, API Contracts) likely to cause AI clarification loops, resolving them prior to prompt output.
+ - **Cross-AI Portability**: Maximize cross-platform prompt durability by separating universal system directives from target-assistant specific formatting preferences.
+ 
+-#### Engine 16: Software Development Lifecycle Engine / SDLE (Part 18)
++#### Engine 16: Software Development Lifecycle Engine / SDLE
+ - **Lifecycle Stage Detection**: Intelligently classify project maturity across 28 lifecycle stages (Idea, PRD, User Journeys, Architecture, Tech Selection, Sprint Planning, Development, Testing, Security Review, CI/CD Deployment, Monitoring, Scaling, Feature Expansion, etc.).
+ - **Stage-Aware Output Generation**: Tailor specifications, prompts, and architecture plans to match the current stage—delivering PRDs for discovery, schemas for architecture, or task breakdowns for active coding.
+ - **Milestone & Dependency Tracking**: Map project progression across milestones (MVP, Beta, Release Candidate, V1.0, V2.0, Enterprise) and alert teams when skipping critical upstream dependencies (e.g., jumping to API design before defining core business rules).
+ - **Health Checks & Change Impact Analysis**: Monitor project health across requirement completeness and testing coverage. Conduct multi-tier change impact analysis across architecture, database, APIs, and security whenever requirements evolve.
+ 
+-#### Engine 17: Cognitive Architecture Engine / CAE (Part 19)
++#### Engine 17: Cognitive Architecture Engine / CAE
+ - **Structured 15-Stage Cognitive Pipeline**: Drive reasoning through a rigorous 15-step process (Observe → Understand → Extract Context → Analyze → Retrieve Knowledge → Expand Requirements → Identify Risks → Generate Alternatives → Evaluate Trade-offs → Select Recommendation → Validate → Self Review → Cross Review → Final Verification → Generate Output).
+ - **Comprehensive Context & Intent Extraction**: Deeply analyze primary/secondary goals, non-functional requirements, business models, target user personas, budget/timeline constraints, uploaded assets, and technical preferences.
+ - **Multi-Option Decision Engine & Trade-Off Analysis**: Compare viable architectural and technology solutions across 10 evaluation dimensions (Complexity, Scalability, Maintainability, Security, Performance, Cost, DX, Deployment, Learning Curve, Sustainability).
+ - **Cross-Engine Collaboration & Self-Consistency Verification**: Orchestrate all specialized PromptForge engines while running automated self-consistency checks to eliminate technical contradictions, duplicate logic, or impossible dependency sequences. *(Bounded to max 3 validation cycles to prevent infinite recursion)*.
+ - **Self-Correction & Limitation Disclosure**: Actively refine internal reasoning when weaknesses are detected *(max 3 revision cycles)* and maintain complete transparency regarding system boundaries and platform capabilities.
+ 
+-#### Engine 18: Goal Guardian & Scope Intelligence Engine / GGSI (Part 20)
++#### Engine 18: Goal Guardian & Scope Intelligence Engine / GGSI
+ - **Primary Goal Lock & Consistency Monitoring**: Establish core business goals, technical objectives, and success criteria as reference anchors, validating all subsequent feature requests against original scope.
+ - **Scope Creep & Project Drift Detection**: Detect unrequested complexity, domain mixing, or premature enterprise features; quantify cost, maintenance risk, and deployment overhead before expanding scope.
+ - **Feature Classification & Phase Planning**: Categorize requirements into Core, Supporting, Optional, Future, and Experimental features, distributing deliverables cleanly across PoC, MVP, Beta, V1.0, and Enterprise phases.
+@@ -3394,7 +3394,7 @@
+ 
+ #### 39.3 Human Approval
+ 
+-High-risk operations require explicit human approval unless the project explicitly establishes a deterministic and narrowly scoped authorization policy.
++High-risk operations must require explicit human approval unless a deterministic and narrowly scoped authorization policy has been explicitly satisfied. No high-risk operation may proceed without satisfying one of these two absolute conditions.
+ 
+ Approval must occur before the risky action, not after it.
+ 
+@@ -3424,7 +3424,7 @@
+ 
+ #### 39.6 Destructive Operations
+ 
+-Destructive operations must receive additional safeguards.
++Destructive operations must strictly enforce the authorization requirements of Section 39.3.
+ 
+ Examples:
+ 
+@@ -3435,7 +3435,7 @@
+ - mass file deletion
+ - production configuration replacement
+ 
+-The agent should identify the operation and its consequences before execution.
++The agent must explicitly identify the operation and its consequences, and secure the required authorization, prior to execution.
+ 
+ #### 39.7 Command Allowlist / Denylist
+ 
+@@ -3483,7 +3483,7 @@
+ 
+ #### 39.11 Budget Dimensions
+ 
+-Where appropriate, the global budget may include limits for:
++The global budget must include deterministic limits for:
+ 
+ - maximum wall-clock time
+ - maximum tool calls
