@@ -106,6 +106,5 @@ export class MultiLLMOrchestrator {
     this.currentBudget += simulatedCost || 0.001; // fallback
     run.budgetConsumed = this.currentBudget;
     return response.text;
-    return result;
   }
 }

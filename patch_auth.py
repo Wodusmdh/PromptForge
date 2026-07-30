@@ -1,8 +1,13 @@
-import { Request, Response, NextFunction } from "express";
+import sys
+
+with open('src/api/middleware/auth.ts', 'r') as f:
+    content = f.read()
+
+replacement = """import { Request, Response, NextFunction } from "express";
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
-  const apiKey = req.headers["x-api-key"] || (authHeader ? authHeader.replace(/^Bearer\s+/i, '') : null);
+  const apiKey = req.headers["x-api-key"] || (authHeader ? authHeader.replace(/^Bearer\\s+/i, '') : null);
 
   const configuredKey = process.env.PROMPTFORGE_API_KEY;
 
@@ -43,3 +48,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
 
   next();
 }
+"""
+
+with open('src/api/middleware/auth.ts', 'w') as f:
+    f.write(replacement)

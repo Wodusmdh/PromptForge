@@ -3,13 +3,16 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
+import { createApiRouter } from "./src/api/routes";
 
 dotenv.config();
 
 const app = express();
+const GEMINI_MODEL = process.env.PROMPTFORGE_GEMINI_MODEL || "gemini-3.6-flash";
 const PORT = 3000;
 
 app.use(express.json({ limit: "10mb" }));
+app.use("/api/v1", createApiRouter());
 
 // Initialize Gemini SDK with User-Agent header for telemetry
 function getGeminiClient() {
@@ -221,7 +224,7 @@ app.post("/api/analyze-idea", async (req, res) => {
 
     const ai = getGeminiClient();
     const response = await ai.models.generateContent({
-      model: "gemini-3.6-flash",
+      model: GEMINI_MODEL,
       contents: `Analyze the following software application idea and recommend optimal technical settings for PromptForge AI v2.0.
 
 Idea:
@@ -319,11 +322,10 @@ Execute PromptForge AI v2.0 engines and generate the final structured output JSO
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.6-flash",
+      model: GEMINI_MODEL,
       contents: userPromptPayload,
       config: {
         systemInstruction: PROMPTFORGE_SYSTEM_PROMPT,
-        temperature: 0.2,
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
@@ -467,7 +469,7 @@ app.post("/api/refine-prompt", async (req, res) => {
 
     const ai = getGeminiClient();
     const response = await ai.models.generateContent({
-      model: "gemini-3.6-flash",
+      model: GEMINI_MODEL,
       contents: `You are PromptForge AI v2.0. Refine and enhance the following Master AI Prompt based on the requested modifications while maintaining extreme clarity, scalability, and zero ambiguity.
 
 EXISTING MASTER PROMPT:

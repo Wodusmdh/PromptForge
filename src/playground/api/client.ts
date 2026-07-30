@@ -4,7 +4,7 @@ export class PromptForgeApiClient {
   private getHeaders() {
     return {
       "Content-Type": "application/json",
-      "X-API-Key": "test-key" // Mock API Key for local dev
+      ...((window as any).PROMPTFORGE_API_KEY ? { "X-API-Key": (window as any).PROMPTFORGE_API_KEY } : {})
     };
   }
 

@@ -5,6 +5,7 @@ import { errorHandler } from "../middleware/errorHandler";
 import assert from "assert";
 
 async function runTests() {
+  process.env.PROMPTFORGE_API_KEY = "test-token";
   console.log("Starting API Tests...");
   
   const app = express();
@@ -27,7 +28,7 @@ async function runTests() {
   // Test 3: Validation fail
   const resValFail = await request(app)
     .post("/api/v1/compile")
-    .set("Authorization", "Bearer token")
+    .set("Authorization", "Bearer test-token")
     .send({ targetAssistant: "gemini" });
   assert.strictEqual(resValFail.status, 400);
   assert.strictEqual(resValFail.body.code, "VALIDATION_ERROR");
@@ -36,7 +37,7 @@ async function runTests() {
   // Test 4: Compile success
   const resSuccess = await request(app)
     .post("/api/v1/compile")
-    .set("Authorization", "Bearer token")
+    .set("Authorization", "Bearer test-token")
     .send({ idea: "Build an app", targetAssistant: "gemini", complexity: "Small", stack: "React" });
   assert.strictEqual(resSuccess.status, 200);
   assert.strictEqual(resSuccess.body.status, "success");

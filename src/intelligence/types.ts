@@ -44,6 +44,7 @@ export interface RoutingRequirements {
   requireStructuredOutput?: boolean;
   maxLatency?: "low" | "medium" | "high";
   maxCostPer1k?: number;
+  routingMode?: "LOCAL_ONLY" | "CLOUD_ALLOWED" | "USER_DECIDES";
 }
 
 export interface RoutingDecision {

@@ -1,59 +1,62 @@
-# PromptForge GitHub Native Development - Implementation Report
+# PromptForge Local AI Runtime - Implementation Report
 
 ## 1. IMPLEMENTATION STATUS
-Phase 2 Foundation implemented successfully. The architecture abstracts GitHub repository interactions and integrates with the existing Multi-LLM Orchestrator for secure, READ-FIRST change planning.
+Phase 3 Local Model Provider Foundation implemented successfully. The architecture now supports an agnostic local runtime adapter (via standard OpenAI-compatible endpoints used by Ollama, LM Studio, etc.) seamlessly integrated into the existing Multi-LLM Orchestrator. 
 
-## 2. FILES CREATED
-- `src/github/types.ts` (Core typings for GitHub metadata, connection states, directory structures, and Diff/Change plan objects)
-- `src/github/GitHubProvider.ts` (Abstractions for GitHub API with token integration and error normalization)
-- `src/github/ChangePlanner.ts` (Integration layer mapping GitHub context to the Multi-LLM Orchestrator to generate `ChangePlan` objects)
-- `src/components/github/GitHubWorkspace.tsx` (UI for exploring repositories, selecting files, and preparing structured changes)
-- `src/github/tests/github.test.ts` (Integration tests)
+## 2. EXISTING ARCHITECTURE REUSED
+- `AIProvider` interface (extending it with `LocalAIProvider`).
+- `MultiLLMOrchestrator` & `ModelRouter` (updated to support `routingMode`).
+- `globalModelRegistry` (utilized for local model registration).
+- `NormalizedRequest` / `NormalizedResponse` formats.
 
-## 3. FILES MODIFIED
-- `src/playground/Playground.tsx` (Added a GitHub workspace tab leveraging the existing visual language and drawer mechanics)
-- `package.json` (Did not require additional dependencies, reused standard fetch and orchestrator models)
+## 3. FILES CREATED
+- `src/intelligence/providers/LocalAIProvider.ts` (Core adapter converting normalized requests into local network fetch operations, handling timeouts, connections, and health checks).
+- `src/components/LocalAIConfigPanel.tsx` (UI for configuring local endpoints and checking connection/discovering models).
+- `src/intelligence/tests/local.test.ts` (Integration tests validating Local AI routing constraints).
 
-## 4. GITHUB ARCHITECTURE
-- **Provider Abstraction**: A unified REST wrapper encapsulates endpoints (`/repos/:owner/:repo`) and maps raw JSON into standardized interfaces (`GitHubFile`, `GitHubDirectoryItem`).
-- **Normalized Error Handling**: Converts 401s, 403s, and 404s into actionable internal types (`GITHUB_AUTH_EXPIRED`, `RATE_LIMITED`, `FILE_NOT_FOUND`).
-- **Orchestrator Integration**: `ChangePlanner` utilizes the `MultiLLMOrchestrator` to generate strict JSON change plans without granting the LLM direct write access.
+## 4. FILES MODIFIED
+- `src/intelligence/types.ts` (Added `routingMode` to `RoutingRequirements`).
+- `src/intelligence/orchestrator/ModelRouter.ts` (Added filtering logic for `LOCAL_ONLY` requirement).
+- `src/components/ModelOrchestratorPanel.tsx` (Added UI selector for Routing Mode and composed `LocalAIConfigPanel`).
 
-## 5. REPOSITORY BROWSER STATUS
-- Implemented and visible in the `GitHubWorkspace`. Supports tree traversal via incremental directory fetching (rather than fetching the entire repository at once).
+## 5. LOCAL RUNTIMES ACTUALLY SUPPORTED
+- Any runtime exposing an OpenAI-compatible REST API structure. Specifically targets default setups for:
+  - LM Studio (`http://localhost:1234/v1`)
+  - Ollama (`http://localhost:11434/v1` natively supports OpenAI API specs).
+  - vLLM / LocalAI standard setups.
 
-## 6. FILE/SEARCH STATUS
-- **File Status**: Read operation supported. Includes a hardcoded size limiter (`maxFileSizeKb`) preventing the system from choking on binary/massive assets.
-- **Search Status**: Foundation exists in `GitHubProvider.searchRepository` but is not yet exposed via the `GitHubWorkspace` UI pending further scope.
+## 6. MODELS ACTUALLY DETECTED
+- The system discovers whatever models the connected endpoint reports via the standard `/v1/models` route. In CI/disconnected mode, zero models are safely reported without crashing.
 
-## 7. CHANGE PLAN STATUS
-- **Operational**: The `ChangePlanner` passes targeted file context to the AI, instructing it to produce a strict JSON `ChangePlan`. The UI successfully parses and renders the proposed files, reasons, and risks.
+## 7. MODEL DISCOVERY STATUS
+- **Operational**: Discovered models are normalized into `ModelDefinition` objects with conservative estimated baseline capabilities (e.g., standard coding/reasoning capabilities mapped, context boundary explicitly enforced).
 
-## 8. DIFF STATUS
-- **Foundational**: The structural models for `DiffPreview` exist in `types.ts`, but generating an actual diff patch and UI rendering component is deferred to the next write-focused phase.
+## 8. LOCAL-ONLY ROUTING STATUS
+- **Enforced**: Added `routingMode` flag. `LOCAL_ONLY` strictly filters out non-local `AIProviderName` models before routing decisions are made. A failure to execute locally results in a `FAILED` execution state; the system will *not* silently fall back to cloud providers.
 
 ## 9. SECURITY STATUS
-- **Secrets Redaction**: `GitHubProvider.redactSecrets` implements a baseline regex sweep (looking for `ghp_` tokens and standard Bearer patterns) over decoded file contents before exposing them to the UI or LLM context.
-- **Client Side Isolation**: The input PAT (Personal Access Token) remains held locally in React state in this mock-up phase, but architectural bounds exist to push it server-side if requested.
+- **Network Boundaries**: API interactions are bounded with explicit local abort controllers ensuring disconnected endpoints don't cause infinite hangs.
+- **Privacy Enforcement**: Client-side secrets remain isolated, and orchestration routing strictly respects the `LOCAL_ONLY` privacy boundary.
 
-## 10. BRANCH SAFETY STATUS
-- **Foundational**: The structural models (`BranchModel`) exist. Read operations respect a default structure. Write workflows have not been implemented, strictly following the READ-FIRST mandate.
+## 10. RESOURCE SAFETY STATUS
+- Connections are constrained by a 15-second default timeout. No unbounded recursive queues. 
 
 ## 11. MOBILE STATUS
-- **Operational**: Tested via Tailwind utility bounds. The file explorer shrinks to a scrollable column in mobile mode, preventing horizontal overflow, while adhering to the core playground layouts.
+- **Operational**: The local UI configuration uses responsive flex boundaries (`flex-col md:flex-row`) to prevent horizontal overflow for long model names or URL input text.
 
 ## 12. TESTS ACTUALLY EXECUTED
-- Repository metadata normalization (handled gracefully in absence of token in strict mode).
-- File-not-found & Auth failure handling.
-- Secret redaction behavior (mock response containing fake token).
-- Static schema verifications.
+- `Test 1: Provider registration passed.`
+- `Test 2: Health check correctly identifies disconnected runtime.`
+- `Test 3: Model discovery fails gracefully.`
+- `Test 4: LOCAL_ONLY routing works correctly.`
+- `Test 5: Local runtime execution fails with normalized error.`
 
 ## 13. TESTS NOT EXECUTED
-- E2E tests executing raw queries against a live, private repository with a real PAT to verify maximum boundary caps (to prevent spending CI time or token risk).
+- Validating large-model multi-GPU inference outputs via a live local runtime inside the cloud container sandbox (requires actual hardware accessibility which the standard CI pipeline doesn't have).
 
 ## 14. KNOWN LIMITATIONS
-- Generating a `ChangePlan` only works for small to medium sets of selected files; massive repository-wide refactoring prompts will exceed context bounds.
-- Binary assets (like images) currently throw a decode error or render unreadably if forced open.
+- We provide conservative default capability estimates (6 out of 10 for coding) to local models because the standard `/models` API does not typically report nuanced model benchmarks.
+- No native streaming handler implemented yet (defaults to non-streaming response resolution).
 
 ## 15. NEXT IMPLEMENTATION BLOCKER
-- Phase 3 will require a Diff renderer component and an explicit "Commit" architecture tied to an authorized backend route capable of signing requests safely.
+- Phase 4 complex tool/function calling logic for small local models can be highly unpredictable; we'll need robust strict output parsers or a structured-output proxy pattern for models that don't natively support JSON mode.

@@ -1,4 +1,9 @@
-import { Request, Response } from "express";
+import sys
+
+with open('src/api/controllers/promptController.ts', 'r') as f:
+    content = f.read()
+
+replacement = """import { Request, Response } from "express";
 import { createCompiler } from "../../compiler/di";
 import { UserRequest, UserRequestSchema } from "../../compiler/models/schemas";
 
@@ -89,7 +94,7 @@ export class PromptController {
     res.status(200).json({
       originalTokens: 100,
       optimizedTokens: 80,
-      optimizedMarkdown: "## Requirements\nBuild great app.",
+      optimizedMarkdown: "## Requirements\\nBuild great app.",
       diff: { removed: ["a"], added: [] }
     });
   }
@@ -110,3 +115,7 @@ export class PromptController {
     });
   }
 }
+"""
+
+with open('src/api/controllers/promptController.ts', 'w') as f:
+    f.write(replacement)

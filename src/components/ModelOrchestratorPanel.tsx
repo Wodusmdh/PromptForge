@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { MultiLLMOrchestrator } from '../intelligence/orchestrator/MultiLLMOrchestrator';
-import { RoutingStrategy, OrchestrationRun, ModelDefinition } from '../intelligence/types';
+import { RoutingStrategy, OrchestrationRun, ModelDefinition, RoutingRequirements } from '../intelligence/types';
+import { LocalAIConfigPanel } from './LocalAIConfigPanel';
 import { globalModelRegistry } from '../intelligence/registry/ModelRegistry';
 
 export const ModelOrchestratorPanel: React.FC = () => {
   const [prompt, setPrompt] = useState('Analyze the architecture of a real-time collaborative editor.');
   const [strategy, setStrategy] = useState<RoutingStrategy>('balanced');
+  const [routingMode, setRoutingMode] = useState<'CLOUD_ALLOWED' | 'LOCAL_ONLY' | 'USER_DECIDES'>('CLOUD_ALLOWED');
   const [run, setRun] = useState<OrchestrationRun | null>(null);
   const [isRunning, setIsRunning] = useState(false);
 
@@ -17,13 +19,14 @@ export const ModelOrchestratorPanel: React.FC = () => {
       'task-1', 
       prompt, 
       strategy, 
-      { taskType: 'architecture', minReasoningCapability: 7 }
+      { taskType: 'architecture', minReasoningCapability: 7, routingMode }
     );
     setRun(result);
     setIsRunning(false);
   };
 
   return (
+    <>
     <div className="bg-slate-900 border border-slate-700 rounded-lg p-6 my-6 text-slate-200">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-amber-400">PromptForge Orchestrator</h2>
@@ -114,5 +117,7 @@ export const ModelOrchestratorPanel: React.FC = () => {
         </div>
       )}
     </div>
+    <LocalAIConfigPanel />
+    </>
   );
 };
