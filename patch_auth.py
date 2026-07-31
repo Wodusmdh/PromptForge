@@ -5,6 +5,7 @@ with open('src/api/middleware/auth.ts', 'r') as f:
 
 replacement = """import { Request, Response, NextFunction } from "express";
 import crypto from "crypto";
+import { browserSessionManager } from "../session/browserSessionStore";
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
@@ -46,11 +47,14 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const cookies = req.headers.cookie || "";
   const match = cookies.match(/pf_session=([^;]+)/);
   if (match && match[1]) {
-     (req as any).user = {
-       id: `browser_${match[1]}`,
-       role: "user"
-     };
-     return next();
+     const session = browserSessionManager.getSession(match[1]);
+     if (session) {
+       (req as any).user = {
+         id: session.userId,
+         role: "user"
+       };
+       return next();
+     }
   }
 
   // 3. Unauthorized

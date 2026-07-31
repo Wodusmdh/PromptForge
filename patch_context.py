@@ -3,7 +3,8 @@ import sys
 with open('src/playground/store/PlaygroundContext.tsx', 'r') as f:
     content = f.read()
 
-replacement = """import React, { createContext, useContext, useState, ReactNode } from "react";
+replacement = """import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { api } from "../api/client";
 
 export interface ExecutionHistory {
   id: string;
@@ -39,6 +40,13 @@ export function PlaygroundProvider({ children }: { children: ReactNode }) {
   const [validationResult, setValidationResult] = useState<any>(null);
   const [history, setHistory] = useState<ExecutionHistory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    // Initialize browser session
+    api.initSession().catch(e => {
+      console.warn("Failed to initialize session", e);
+    });
+  }, []);
 
   const addToHistory = (entry: ExecutionHistory) => {
     setHistory((prev) => [entry, ...prev]);

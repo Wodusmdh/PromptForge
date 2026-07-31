@@ -1,4 +1,9 @@
-import express from "express";
+import sys
+
+with open('src/api/tests/api.test.ts', 'r') as f:
+    content = f.read()
+
+replacement = """import express from "express";
 import request from "supertest";
 import { createApiRouter } from "../routes";
 import { errorHandler } from "../middleware/errorHandler";
@@ -236,3 +241,7 @@ runTests().catch(e => {
   console.error(e);
   process.exit(1);
 });
+"""
+
+with open('src/api/tests/api.test.ts', 'w') as f:
+    f.write(replacement)

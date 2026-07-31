@@ -31,10 +31,29 @@ export class PromptForgeApiClient {
     return res.json();
   }
 
+  async initSession() {
+    const res = await fetch(`${this.baseUrl}/auth/session`, {
+      method: "POST",
+      headers: this.getHeaders(),
+      credentials: "same-origin"
+    });
+    return this.handleResponse(res);
+  }
+
+  async logout() {
+    const res = await fetch(`${this.baseUrl}/auth/logout`, {
+      method: "POST",
+      headers: this.getHeaders(),
+      credentials: "same-origin"
+    });
+    return this.handleResponse(res);
+  }
+
   async compile(idea: string, targetAssistant: string = "gemini") {
     const res = await fetch(`${this.baseUrl}/compile`, {
       method: "POST",
       headers: this.getHeaders(),
+      credentials: "same-origin",
       body: JSON.stringify({ idea, targetAssistant })
     });
     return this.handleResponse(res);
@@ -44,6 +63,7 @@ export class PromptForgeApiClient {
     const res = await fetch(`${this.baseUrl}/optimize`, {
       method: "POST",
       headers: this.getHeaders(),
+      credentials: "same-origin",
       body: JSON.stringify({ sessionId })
     });
     return this.handleResponse(res);
@@ -53,6 +73,7 @@ export class PromptForgeApiClient {
     const res = await fetch(`${this.baseUrl}/analyze`, {
       method: "POST",
       headers: this.getHeaders(),
+      credentials: "same-origin",
       body: JSON.stringify({ sessionId })
     });
     return this.handleResponse(res);
@@ -62,6 +83,7 @@ export class PromptForgeApiClient {
     const res = await fetch(`${this.baseUrl}/validate`, {
       method: "POST",
       headers: this.getHeaders(),
+      credentials: "same-origin",
       body: JSON.stringify({ sessionId })
     });
     return this.handleResponse(res);
@@ -71,6 +93,7 @@ export class PromptForgeApiClient {
     const res = await fetch(`${this.baseUrl}/rules/search`, {
       method: "POST",
       headers: this.getHeaders(),
+      credentials: "same-origin",
       body: JSON.stringify({ query })
     });
     return this.handleResponse(res);
