@@ -26,12 +26,19 @@ export class RequestParser {
    */
   static async extractIntent(request: UserRequest): Promise<ParsedIntent> {
     // Placeholder for actual LLM call
+    const goals = [];
+    if (request.complexity && request.stack) {
+      goals.push(`Build a ${request.complexity} application using ${request.stack}`);
+    } else {
+      goals.push(`Build an application based on user request`);
+    }
+
     return {
-      primaryGoal: `Build a ${request.complexity} application using ${request.stack}`,
+      primaryGoal: goals[0],
       secondaryGoals: ["Ensure clean architecture", "Apply strict security"],
       targetAudience: "General Users",
       businessDomain: "Software",
-      technicalScope: request.architectureStyle,
+      technicalScope: request.architectureStyle || "As specified",
       assumptions: ["Standard web deployment"],
     };
   }

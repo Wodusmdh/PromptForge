@@ -5,7 +5,7 @@ import { CompiledPromptSchema, ExecutionPlanSchema, RuleDefinitionSchema } from 
 
 const CompileRequestSchema = z.object({
   idea: z.string().min(1, "The request body must include a string 'idea'."),
-  targetAssistant: z.string().min(1, "Missing or invalid 'targetAssistant'."),
+  targetAssistant: z.string().optional(),
   complexity: z.string().optional(),
   stack: z.string().optional(),
   architectureStyle: z.string().optional(),

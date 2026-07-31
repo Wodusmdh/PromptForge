@@ -23,15 +23,16 @@ export class RequestParser implements IRequestParser {
       category = "Frontend Application";
     }
 
-    const explicitRequirements = [
-      `Target Assistant: ${request.targetAssistant}`,
-      `Complexity: ${request.complexity}`,
-      `Tech Stack: ${request.stack}`,
-      `Architecture: ${request.architectureStyle}`,
-      `UI Style: ${request.uiStyle}`,
-      `Database: ${request.dbType}`,
-      `Security: ${request.securityLevel}`
-    ];
+    
+    const explicitRequirements: string[] = [];
+    if (request.targetAssistant) explicitRequirements.push(`Target Assistant: ${request.targetAssistant}`);
+    if (request.complexity) explicitRequirements.push(`Complexity: ${request.complexity}`);
+    if (request.stack) explicitRequirements.push(`Tech Stack: ${request.stack}`);
+    if (request.architectureStyle) explicitRequirements.push(`Architecture: ${request.architectureStyle}`);
+    if (request.uiStyle) explicitRequirements.push(`UI Style: ${request.uiStyle}`);
+    if (request.dbType) explicitRequirements.push(`Database: ${request.dbType}`);
+    if (request.securityLevel) explicitRequirements.push(`Security: ${request.securityLevel}`);
+
     
     if (request.additionalRules) {
       explicitRequirements.push(`Rules: ${request.additionalRules}`);

@@ -48,7 +48,7 @@ export class PromptForgeApiClient {
     return this.handleResponse(res);
   }
 
-  async compile(idea: string, targetAssistant: string = "gemini") {
+  async compile(idea: string, targetAssistant?: string) {
     const res = await fetch(`${this.baseUrl}/compile`, {
       method: "POST",
       headers: this.getHeaders(),

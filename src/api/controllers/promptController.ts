@@ -49,17 +49,22 @@ export class PromptController {
          }
       }
 
-      const requestPayload = {
-        idea,
-        targetAssistant: normalizedAssistant,
-        complexity: rest.complexity || "Medium",
-        stack: rest.stack || "React 19 + Express + Tailwind CSS v4",
-        architectureStyle: rest.architectureStyle || "Modular Monolith",
-        uiStyle: rest.uiStyle || "Modern Minimalist",
-        dbType: rest.dbType || "PostgreSQL",
-        securityLevel: rest.securityLevel || "Standard",
-        additionalRules: rest.additionalRules || "",
+            const requestPayload: any = {
+        idea
       };
+      
+      if (normalizedAssistant && normalizedAssistant !== "generic") {
+        requestPayload.targetAssistant = normalizedAssistant;
+      }
+      
+      if (rest.complexity) requestPayload.complexity = rest.complexity;
+      if (rest.stack) requestPayload.stack = rest.stack;
+      if (rest.architectureStyle) requestPayload.architectureStyle = rest.architectureStyle;
+      if (rest.uiStyle) requestPayload.uiStyle = rest.uiStyle;
+      if (rest.dbType) requestPayload.dbType = rest.dbType;
+      if (rest.securityLevel) requestPayload.securityLevel = rest.securityLevel;
+      if (rest.additionalRules) requestPayload.additionalRules = rest.additionalRules;
+
 
       const parsedRequest = UserRequestSchema.parse(requestPayload);
 
