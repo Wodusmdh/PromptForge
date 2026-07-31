@@ -1,4 +1,9 @@
-import { Request, Response, NextFunction } from "express";
+import sys
+
+with open('src/api/middleware/auth.ts', 'r') as f:
+    content = f.read()
+
+replacement = """import { Request, Response, NextFunction } from "express";
 import crypto from "crypto";
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
@@ -55,3 +60,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
       error: "Missing authentication credentials. Include Authorization: Bearer <key> or X-API-Key: <key> header, or use a browser session."
   });
 }
+"""
+
+with open('src/api/middleware/auth.ts', 'w') as f:
+    f.write(replacement)

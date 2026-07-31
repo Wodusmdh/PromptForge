@@ -1,15 +1,17 @@
-import { Router } from "express";
-import { PromptController } from "../controllers/promptController";
-import { SystemController } from "../controllers/systemController";
-import { RuleController } from "../controllers/ruleController";
-import { requireAuth } from "../middleware/auth";
-import { rateLimiter } from "../middleware/rateLimit";
-import { requestLogger } from "../middleware/logger";
-import { validateCompileRequest, validateSessionOrPromptRequest, validateValidateRequest } from "../models/schemas";
-import { requestTimeout } from "../middleware/timeout";
-import { securityHeaders } from "../middleware/securityHeaders";
+import sys
 
-export function createApiRouter(): Router {
+with open('src/api/routes/index.ts', 'r') as f:
+    content = f.read()
+
+content = content.replace(
+"""import { validateCompileRequest } from "../models/schemas";""",
+"""import { validateCompileRequest, validateSessionOrPromptRequest, validateValidateRequest } from "../models/schemas";
+import { requestTimeout } from "../middleware/timeout";
+import { securityHeaders } from "../middleware/securityHeaders";"""
+)
+
+# Replace the router part
+new_router = """export function createApiRouter(): Router {
   const router = Router();
   
   const promptCtrl = new PromptController();
@@ -40,4 +42,10 @@ export function createApiRouter(): Router {
   router.use(protectedRoute);
   
   return router;
-}
+}"""
+
+import re
+content = re.sub(r'export function createApiRouter\(\): Router \{.*\}', new_router, content, flags=re.DOTALL)
+
+with open('src/api/routes/index.ts', 'w') as f:
+    f.write(content)

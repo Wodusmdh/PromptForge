@@ -1,4 +1,9 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import sys
+
+with open('src/playground/store/PlaygroundContext.tsx', 'r') as f:
+    content = f.read()
+
+replacement = """import React, { createContext, useContext, useState, ReactNode } from "react";
 
 export interface ExecutionHistory {
   id: string;
@@ -61,3 +66,7 @@ export function usePlayground() {
   if (!context) throw new Error("usePlayground must be used within PlaygroundProvider");
   return context;
 }
+"""
+
+with open('src/playground/store/PlaygroundContext.tsx', 'w') as f:
+    f.write(replacement)

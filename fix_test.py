@@ -1,7 +1,9 @@
-with open('src/intelligence/tests/local.test.ts', 'r') as f:
+import sys
+
+with open('src/api/tests/api.test.ts', 'r') as f:
     content = f.read()
 
-content = content.replace('assert.strictEqual(run.state, "COMPLETED_WITH_WARNINGS");', 'assert.strictEqual(run.state, "FAILED");')
+content = content.replace('resSuccess.headers', 'resSuccess.header')
 
-with open('src/intelligence/tests/local.test.ts', 'w') as f:
+with open('src/api/tests/api.test.ts', 'w') as f:
     f.write(content)

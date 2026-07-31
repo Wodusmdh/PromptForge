@@ -145,6 +145,27 @@ async function runTests() {
   assert.strictEqual(resValFail2.status, 400);
   console.log("Error paths test passed.");
 
+  // Test 13: Oversized Payload
+  const largePayload = {
+    idea: "A".repeat(2 * 1024 * 1024), // 2MB string
+    targetAssistant: "gemini"
+  };
+  const resOversize = await request(app)
+    .post("/api/v1/compile")
+    .set("Authorization", "Bearer test-token")
+    .send(largePayload);
+  assert.strictEqual(resOversize.status, 413); // Payload Too Large
+  console.log("Oversized payload test passed.");
+
+  // Test 14: Rate Limit
+  // In tests, the limit is 100 requests. We will just simulate it by sending requests until it 429s, 
+  // but to avoid taking too long, we will use a different user/IP and a test config if possible, 
+  // or we can just verify the rate limit headers exist on a normal request.
+  assert.ok(resSuccess.header["x-ratelimit-limit"]);
+  assert.ok(resSuccess.header["x-ratelimit-remaining"]);
+  assert.ok(resSuccess.header["x-ratelimit-reset"]);
+  console.log("Rate limit headers test passed.");
+
   console.log("API integration test passed successfully.");
 }
 runTests().catch(e => {

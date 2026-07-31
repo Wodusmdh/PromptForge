@@ -1,4 +1,9 @@
-import React, { useState } from "react";
+import sys
+
+with open('src/playground/components/editor/PromptEditor.tsx', 'r') as f:
+    content = f.read()
+
+replacement = """import React, { useState } from "react";
 import { usePlayground } from "../../store/PlaygroundContext";
 import { api } from "../../api/client";
 import { Play, Sparkles, CheckCircle2, FileText, AlertTriangle } from "lucide-react";
@@ -40,7 +45,7 @@ export function PromptEditor() {
       setValidationResult(null);
     } catch (e: any) {
       console.error(e);
-      setErrorMsg("Compilation failed\n\n" + (e instanceof Error ? e.message : String(e)));
+      setErrorMsg("Compilation failed\\n\\n" + (e instanceof Error ? e.message : String(e)));
     } finally {
       setIsLoading(false);
     }
@@ -58,7 +63,7 @@ export function PromptEditor() {
       setOptimizationResult(result);
     } catch (e: any) {
       console.error(e);
-      setErrorMsg("Optimization failed\n\n" + (e instanceof Error ? e.message : String(e)));
+      setErrorMsg("Optimization failed\\n\\n" + (e instanceof Error ? e.message : String(e)));
     } finally {
       setIsLoading(false);
     }
@@ -76,7 +81,7 @@ export function PromptEditor() {
       setValidationResult(result);
     } catch (e: any) {
       console.error(e);
-      setErrorMsg("Validation failed\n\n" + (e instanceof Error ? e.message : String(e)));
+      setErrorMsg("Validation failed\\n\\n" + (e instanceof Error ? e.message : String(e)));
     } finally {
       setIsLoading(false);
     }
@@ -89,7 +94,7 @@ export function PromptEditor() {
           <FileText className="w-5 h-5 text-indigo-400" /> Omni-Box
         </h2>
         <div className="flex gap-2 text-xs text-[#8B949E]">
-          <span>Words: {idea.split(/\s+/).filter(w => w).length}</span>
+          <span>Words: {idea.split(/\\s+/).filter(w => w).length}</span>
           <span className="hidden sm:inline">Tokens: {Math.ceil(idea.length / 4)}</span>
         </div>
       </div>
@@ -143,3 +148,7 @@ export function PromptEditor() {
     </div>
   );
 }
+"""
+
+with open('src/playground/components/editor/PromptEditor.tsx', 'w') as f:
+    f.write(replacement)

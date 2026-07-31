@@ -8,44 +8,63 @@ export class PromptForgeApiClient {
     };
   }
 
+  private async handleResponse(res: Response) {
+    if (!res.ok) {
+      let errorData;
+      try {
+        errorData = await res.json();
+      } catch (e) {
+        errorData = { message: await res.text() };
+      }
+      
+      const requestId = res.headers.get("x-request-id") || errorData.requestId;
+      const errorCode = errorData.code || res.statusText;
+      const errorMessage = errorData.message || errorData.error || "Unknown error";
+      
+      let formattedMsg = `${res.status} ${errorCode}:\n${errorMessage}`;
+      if (requestId) {
+        formattedMsg += `\n\nRequest ID:\n${requestId}`;
+      }
+      
+      throw new Error(formattedMsg);
+    }
+    return res.json();
+  }
+
   async compile(idea: string, targetAssistant: string = "gemini") {
     const res = await fetch(`${this.baseUrl}/compile`, {
       method: "POST",
       headers: this.getHeaders(),
       body: JSON.stringify({ idea, targetAssistant })
     });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
+    return this.handleResponse(res);
   }
 
-  async optimize(promptId: string) {
+  async optimize(sessionId: string) {
     const res = await fetch(`${this.baseUrl}/optimize`, {
       method: "POST",
       headers: this.getHeaders(),
-      body: JSON.stringify({ promptId })
+      body: JSON.stringify({ sessionId })
     });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
+    return this.handleResponse(res);
   }
 
-  async analyze(promptId: string) {
+  async analyze(sessionId: string) {
     const res = await fetch(`${this.baseUrl}/analyze`, {
       method: "POST",
       headers: this.getHeaders(),
-      body: JSON.stringify({ promptId })
+      body: JSON.stringify({ sessionId })
     });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
+    return this.handleResponse(res);
   }
 
-  async validate(promptId: string) {
+  async validate(sessionId: string) {
     const res = await fetch(`${this.baseUrl}/validate`, {
       method: "POST",
       headers: this.getHeaders(),
-      body: JSON.stringify({ promptId })
+      body: JSON.stringify({ sessionId })
     });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
+    return this.handleResponse(res);
   }
 
   async searchRules(query: string) {
@@ -54,8 +73,7 @@ export class PromptForgeApiClient {
       headers: this.getHeaders(),
       body: JSON.stringify({ query })
     });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
+    return this.handleResponse(res);
   }
 }
 

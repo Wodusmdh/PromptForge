@@ -1,4 +1,9 @@
-import { Request, Response, NextFunction } from "express";
+import sys
+
+with open('src/api/middleware/errorHandler.ts', 'r') as f:
+    content = f.read()
+
+replacement = """import { Request, Response, NextFunction } from "express";
 import { PromptForgeError, ApiError } from "../models/errors";
 
 export function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
@@ -29,3 +34,7 @@ export function errorHandler(err: any, req: Request, res: Response, next: NextFu
   };
   return res.status(500).json(response);
 }
+"""
+
+with open('src/api/middleware/errorHandler.ts', 'w') as f:
+    f.write(replacement)
