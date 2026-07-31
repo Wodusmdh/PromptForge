@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from "express";
+import crypto from "crypto";
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
   const apiKey = req.headers["x-api-key"] || (authHeader ? authHeader.replace(/^Bearer\s+/i, '') : null);
-
-  const configuredKey = process.env.PROMPTFORGE_API_KEY;
+  const configuredKeyStr = process.env.PROMPTFORGE_API_KEY;
 
   if (process.env.NODE_ENV !== 'production' && process.env.DISABLE_AUTH_FOR_DEV === 'true') {
      // Explicit development bypass
@@ -12,7 +12,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
      return next();
   }
 
-  if (!configuredKey) {
+  if (!configuredKeyStr) {
     return res.status(500).json({
        status: "error",
        code: "SERVER_MISCONFIGURED",
@@ -20,7 +20,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
     });
   }
 
-  if (!apiKey) {
+  if (!apiKey || typeof apiKey !== 'string') {
     return res.status(401).json({
         status: "error",
         code: "UNAUTHORIZED",
@@ -28,7 +28,9 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
     });
   }
 
-  if (apiKey !== configuredKey) {
+  const validKeys = configuredKeyStr.split(',').map(k => k.trim());
+
+  if (!validKeys.includes(apiKey)) {
     return res.status(403).json({
         status: "error",
         code: "FORBIDDEN",
@@ -36,8 +38,11 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
     });
   }
 
+  // Create a deterministic one-way hash of the API key to use as the ownerId
+  const hash = crypto.createHash('sha256').update(apiKey).digest('hex');
+
   (req as any).user = {
-    id: "authenticated_user",
+    id: `user_${hash.substring(0, 16)}`,
     role: "developer"
   };
 

@@ -1,0 +1,60 @@
+name: CI Verification
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Lint
+        run: npm run lint
+
+      - name: Run Build
+        run: npm run build
+
+      - name: Test Compiler
+        run: npm run test:compiler
+
+      - name: Test Orchestrator
+        run: npm run test:orchestrator
+
+      - name: Test Runtime
+        run: npm run test:runtime
+
+      - name: Test SDK
+        run: npm run test:sdk
+
+      - name: Test Intelligence
+        run: npm run test:intelligence
+
+      - name: Test Optimization
+        run: npm run test:optimization
+
+      - name: Test API
+        run: npm run test:api
+
+      - name: Test CLI
+        run: npm run test:cli
+
+      - name: Test Playground
+        run: npm run test:playground

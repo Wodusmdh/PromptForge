@@ -5,19 +5,13 @@ import { errorHandler } from "../middleware/errorHandler";
 import assert from "assert";
 
 async function runTests() {
-  process.env.PROMPTFORGE_API_KEY = "test-token";
+  process.env.PROMPTFORGE_API_KEY = "test-token,test-token-2"; // Support multiple keys for testing
+  process.env.DISABLE_AUTH_FOR_DEV = "false"; // Disable dev bypass so auth is actually tested
+  
   console.log("Starting API Tests...");
   
   const app = express();
   app.use(express.json());
-  // Mock req.user for tests
-  app.use((req, res, next) => {
-    // Basic auth header is used for user overriding in tests
-    if (req.headers["x-test-user"]) {
-      (req as any).user = { id: req.headers["x-test-user"] as string, role: "developer" };
-    }
-    next();
-  });
   app.use("/api/v1", createApiRouter());
   app.use(errorHandler);
 
@@ -42,11 +36,10 @@ async function runTests() {
   assert.strictEqual(resValFail.body.code, "VALIDATION_ERROR");
   console.log("Validation fail test passed.");
 
-  // Test 4: Compile success & Target Assistant Normalization & Session Creation
+  // Test 4: Compile success & Session Creation (TEST A - same user)
   const resSuccess = await request(app)
     .post("/api/v1/compile")
     .set("Authorization", "Bearer test-token")
-    .set("x-test-user", "user-1")
     .send({ idea: "Build a high security real-time chat application", targetAssistant: "gemini", complexity: "Small", stack: "React" });
   assert.strictEqual(resSuccess.status, 200);
   assert.strictEqual(resSuccess.body.status, "success");
@@ -56,33 +49,30 @@ async function runTests() {
   console.log("Compile success & session creation test passed.");
   const sessionId1 = resSuccess.body.sessionId;
 
-  // Test 6: Optimize via sessionId
+  // Test 6: Optimize via sessionId (TEST A - same user access)
   const resOptimize = await request(app)
     .post("/api/v1/optimize")
     .set("Authorization", "Bearer test-token")
-    .set("x-test-user", "user-1")
     .send({ sessionId: sessionId1 });
   assert.strictEqual(resOptimize.status, 200);
   assert.strictEqual(resOptimize.body.status, "success");
   assert.ok(typeof resOptimize.body.optimizedTokens === "number");
   console.log("Optimize via sessionId test passed.");
 
-  // Test 7: Analyze via sessionId
+  // Test 7: Analyze via sessionId (TEST A - same user access)
   const resAnalyze = await request(app)
     .post("/api/v1/analyze")
     .set("Authorization", "Bearer test-token")
-    .set("x-test-user", "user-1")
     .send({ sessionId: sessionId1 });
   assert.strictEqual(resAnalyze.status, 200);
   assert.strictEqual(resAnalyze.body.status, "success");
   assert.ok(typeof resAnalyze.body.qualityScore === "number");
   console.log("Analyze via sessionId test passed.");
 
-  // Test 8: Validate via sessionId
+  // Test 8: Validate via sessionId (TEST A - same user access)
   const resValA = await request(app)
     .post("/api/v1/validate")
     .set("Authorization", "Bearer test-token")
-    .set("x-test-user", "user-1")
     .send({ sessionId: sessionId1 });
   assert.strictEqual(resValA.status, 200);
   assert.strictEqual(resValA.body.isValid, true);
@@ -92,25 +82,29 @@ async function runTests() {
   const resMissingSession = await request(app)
     .post("/api/v1/optimize")
     .set("Authorization", "Bearer test-token")
-    .set("x-test-user", "user-1")
     .send({ sessionId: "nonexistent-session" });
   assert.strictEqual(resMissingSession.status, 404);
   assert.strictEqual(resMissingSession.body.code, "SESSION_NOT_FOUND");
   console.log("Missing session test passed.");
 
-  // Test 10: Session Ownership (Skipped due to limitation - all auth requests are currently hardcoded to "authenticated_user" in requireAuth)
+  // Test 10: Session Ownership (TEST B & TEST C - different users, ownership check)
+  const resOwnership = await request(app)
+    .post("/api/v1/optimize")
+    .set("Authorization", "Bearer test-token-2") // Different user key
+    .send({ sessionId: sessionId1 });
+  assert.strictEqual(resOwnership.status, 403);
+  assert.strictEqual(resOwnership.body.code, "SESSION_FORBIDDEN");
+  console.log("Session ownership test passed.");
 
-  // Test 11: Concurrent Isolation
+  // Test 11: Concurrent Isolation (TEST D)
   const reqA = request(app)
     .post("/api/v1/compile")
     .set("Authorization", "Bearer test-token")
-    .set("x-test-user", "user-a")
     .send({ idea: "Build a banking dashboard", targetAssistant: "gemini" });
 
   const reqB = request(app)
     .post("/api/v1/compile")
-    .set("Authorization", "Bearer test-token")
-    .set("x-test-user", "user-b")
+    .set("Authorization", "Bearer test-token-2")
     .send({ idea: "Build a multiplayer game", targetAssistant: "gemini" });
 
   const [resA, resB] = await Promise.all([reqA, reqB]);
@@ -125,13 +119,11 @@ async function runTests() {
   const optReqA = request(app)
     .post("/api/v1/optimize")
     .set("Authorization", "Bearer test-token")
-    .set("x-test-user", "user-a")
     .send({ sessionId: sessionIdA });
 
   const optReqB = request(app)
     .post("/api/v1/optimize")
-    .set("Authorization", "Bearer test-token")
-    .set("x-test-user", "user-b")
+    .set("Authorization", "Bearer test-token-2")
     .send({ sessionId: sessionIdB });
 
   const [resOptA, resOptB] = await Promise.all([optReqA, optReqB]);
