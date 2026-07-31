@@ -11,12 +11,7 @@ import { PromptDiffGenerator } from "../../optimization/diff/promptDiff";
 import { PromptOptimizer } from "../../optimization/core/optimizer";
 import { ValidationPipeline } from "../../compiler/core/validationPipeline";
 
-// In-memory store for development/testing
-const currentSession: {
-  prompt: CompiledPrompt | null;
-  plan: ResolvedExecutionPlan | null;
-  rules: RuleSet | null;
-} = { prompt: null, plan: null, rules: null };
+import { SessionStore } from "../session/sessionStore";
 
 export class PromptController {
   async compile(req: Request, res: Response) {
@@ -71,14 +66,16 @@ export class PromptController {
       const compiler = createCompiler();
       const compilerOutput = await compiler.compile(parsedRequest);
 
-      // Store current compilation for optimize/analyze/validate
-      currentSession.prompt = compilerOutput.compiledPrompt;
-      currentSession.rules = { mandatory: compilerOutput.selectedRules, optional: [], conflictsDetected: false }; 
-      currentSession.plan = { planId: "1", orderedEngines: compilerOutput.selectedEngines, resolutionNotes: [] };
+      // Store current compilation for optimize/analyze/validate in isolated session
+      const userId = (req as any).user?.id || "anonymous";
+      const rules: RuleSet = { mandatory: compilerOutput.selectedRules, optional: [], conflictsDetected: false }; 
+      const plan: ResolvedExecutionPlan = { planId: "1", orderedEngines: compilerOutput.selectedEngines, resolutionNotes: [] };
+      const session = SessionStore.createSession(userId, compilerOutput.compiledPrompt, plan, rules);
 
       return res.status(200).json({
         id: compilerOutput.compiledPrompt.id,
         status: "success",
+        sessionId: session.sessionId,
         compiledPrompt: compilerOutput.compiledPrompt,
         executionSummary: compilerOutput.executionSummary,
         selectedRules: compilerOutput.selectedRules,
@@ -104,8 +101,22 @@ export class PromptController {
 
   async optimize(req: Request, res: Response) {
     try {
-      let promptToOptimize = currentSession.prompt;
-      if (req.body.compiledPrompt !== undefined) promptToOptimize = req.body.compiledPrompt;
+      let promptToOptimize = undefined;
+      const { sessionId, compiledPrompt } = req.body;
+      const userId = (req as any).user?.id || "anonymous";
+
+      if (sessionId) {
+        const session = SessionStore.getSession(sessionId, userId);
+        if (session === 'FORBIDDEN') {
+          return res.status(403).json({ status: "error", code: "SESSION_FORBIDDEN", error: "You do not have access to this session." });
+        }
+        if (!session) {
+          return res.status(404).json({ status: "error", code: "SESSION_NOT_FOUND", error: "Session not found." });
+        }
+        promptToOptimize = session.prompt;
+      } else if (compiledPrompt !== undefined) {
+        promptToOptimize = compiledPrompt;
+      }
 
       if (!promptToOptimize) {
          return res.status(400).json({ status: "error", code: "VALIDATION_ERROR", error: "No compiled prompt provided." });
@@ -135,8 +146,22 @@ export class PromptController {
 
   async analyze(req: Request, res: Response) {
     try {
-      let promptToAnalyze = currentSession.prompt;
-      if (req.body.compiledPrompt !== undefined) promptToAnalyze = req.body.compiledPrompt;
+      let promptToAnalyze = undefined;
+      const { sessionId, compiledPrompt } = req.body;
+      const userId = (req as any).user?.id || "anonymous";
+
+      if (sessionId) {
+        const session = SessionStore.getSession(sessionId, userId);
+        if (session === 'FORBIDDEN') {
+          return res.status(403).json({ status: "error", code: "SESSION_FORBIDDEN", error: "You do not have access to this session." });
+        }
+        if (!session) {
+          return res.status(404).json({ status: "error", code: "SESSION_NOT_FOUND", error: "Session not found." });
+        }
+        promptToAnalyze = session.prompt;
+      } else if (compiledPrompt !== undefined) {
+        promptToAnalyze = compiledPrompt;
+      }
 
       if (!promptToAnalyze) {
          return res.status(400).json({ status: "error", code: "VALIDATION_ERROR", error: "No compiled prompt provided." });
@@ -160,13 +185,28 @@ export class PromptController {
 
   async validate(req: Request, res: Response) {
     try {
-      let promptToValidate = currentSession.prompt;
-      let planToValidate = currentSession.plan;
-      let rulesToValidate = currentSession.rules;
+      let promptToValidate = undefined;
+      let planToValidate = undefined;
+      let rulesToValidate = undefined;
+      const { sessionId, compiledPrompt, plan, rules } = req.body;
+      const userId = (req as any).user?.id || "anonymous";
 
-      if (req.body.compiledPrompt !== undefined) promptToValidate = req.body.compiledPrompt;
-      if (req.body.plan !== undefined) planToValidate = req.body.plan;
-      if (req.body.rules !== undefined) rulesToValidate = req.body.rules;
+      if (sessionId) {
+        const session = SessionStore.getSession(sessionId, userId);
+        if (session === 'FORBIDDEN') {
+          return res.status(403).json({ status: "error", code: "SESSION_FORBIDDEN", error: "You do not have access to this session." });
+        }
+        if (!session) {
+          return res.status(404).json({ status: "error", code: "SESSION_NOT_FOUND", error: "Session not found." });
+        }
+        promptToValidate = session.prompt;
+        planToValidate = session.plan;
+        rulesToValidate = session.rules;
+      } else {
+        if (compiledPrompt !== undefined) promptToValidate = compiledPrompt;
+        if (plan !== undefined) planToValidate = plan;
+        if (rules !== undefined) rulesToValidate = rules;
+      }
 
       if (!promptToValidate || !planToValidate || !rulesToValidate) {
          return res.status(400).json({ status: "error", code: "VALIDATION_ERROR", error: "No compiled prompt, plan, or rules provided." });
