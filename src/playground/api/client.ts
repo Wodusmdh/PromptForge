@@ -3,8 +3,7 @@ export class PromptForgeApiClient {
 
   private getHeaders() {
     return {
-      "Content-Type": "application/json",
-      ...((window as any).PROMPTFORGE_API_KEY ? { "X-API-Key": (window as any).PROMPTFORGE_API_KEY } : {})
+      "Content-Type": "application/json"
     };
   }
 

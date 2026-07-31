@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from "react";
 import { api } from "../api/client";
 
 export interface ExecutionHistory {
@@ -23,6 +23,8 @@ interface PlaygroundState {
   addToHistory: (entry: ExecutionHistory) => void;
   isLoading: boolean;
   setIsLoading: (val: boolean) => void;
+  isAuthInitializing: boolean;
+  authError: string | null;
 }
 
 const PlaygroundContext = createContext<PlaygroundState | undefined>(undefined);
@@ -35,12 +37,40 @@ export function PlaygroundProvider({ children }: { children: ReactNode }) {
   const [validationResult, setValidationResult] = useState<any>(null);
   const [history, setHistory] = useState<ExecutionHistory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  
+  const [isAuthInitializing, setIsAuthInitializing] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  const initAttempted = useRef(false);
 
   useEffect(() => {
-    // Initialize browser session
-    api.initSession().catch(e => {
-      console.warn("Failed to initialize session", e);
-    });
+    if (initAttempted.current) return;
+    initAttempted.current = true;
+
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    const initAuth = async () => {
+      while (attempts < maxAttempts) {
+        try {
+          attempts++;
+          await api.initSession();
+          setIsAuthInitializing(false);
+          setAuthError(null);
+          return;
+        } catch (e: any) {
+          console.warn(`Auth init attempt ${attempts} failed:`, e);
+          if (attempts >= maxAttempts) {
+            setIsAuthInitializing(false);
+            setAuthError("Failed to initialize secure session. Please refresh.\n\n" + (e instanceof Error ? e.message : String(e)));
+            return;
+          }
+          await new Promise(res => setTimeout(res, 500));
+        }
+      }
+    };
+
+    initAuth();
   }, []);
 
   const addToHistory = (entry: ExecutionHistory) => {
@@ -56,7 +86,8 @@ export function PlaygroundProvider({ children }: { children: ReactNode }) {
         optimizationResult, setOptimizationResult,
         validationResult, setValidationResult,
         history, addToHistory,
-        isLoading, setIsLoading
+        isLoading, setIsLoading,
+        isAuthInitializing, authError
       }}
     >
       {children}
