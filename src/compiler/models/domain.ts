@@ -38,8 +38,10 @@ export const ReqNodeSchema = z.object({
   confidence: z.number().optional(),
   source: z.string().optional(),
   reason: z.string().optional(),
+  evidence: z.string().optional(),
+  origin: z.string().optional(),
   text: z.string().optional(),
-  status: z.enum(["accepted", "needs user clarification", "rejected"]).optional(),
+  status: z.enum(["Accepted", "Optional", "Rejected", "Conflict", "Missing Information", "accepted", "needs user clarification", "rejected"]).optional(),
   duplicateCount: z.number().optional()
 });
 export type ReqNode = z.infer<typeof ReqNodeSchema>;

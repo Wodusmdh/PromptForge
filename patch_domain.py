@@ -1,35 +1,19 @@
-import sys
+import re
 
 with open('src/compiler/models/domain.ts', 'r') as f:
     content = f.read()
 
-import re
-
-# Add text, status, duplicateCount to ReqNodeSchema
+# Update ReqNodeSchema
 replacement_req = """  confidence: z.number().optional(),
   source: z.string().optional(),
   reason: z.string().optional(),
+  evidence: z.string().optional(),
+  origin: z.string().optional(),
   text: z.string().optional(),
-  status: z.enum(["accepted", "needs user clarification", "rejected"]).optional(),
+  status: z.enum(["Accepted", "Optional", "Rejected", "Conflict", "Missing Information", "accepted", "needs user clarification", "rejected"]).optional(),
   duplicateCount: z.number().optional()"""
 
-content = re.sub(r'  confidence: z\.number\(\)\.optional\(\),\n  source: z\.string\(\)\.optional\(\),\n  reason: z\.string\(\)\.optional\(\)', replacement_req, content)
-
-# Add metrics to RequirementGraphSchema
-replacement_graph = """export const RequirementGraphSchema = z.object({
-  nodes: z.array(ReqNodeSchema),
-  edges: z.array(z.object({ from: z.string(), to: z.string() })),
-  metrics: z.object({
-    requirementCoverage: z.number(),
-    conflictCount: z.number(),
-    duplicateCount: z.number(),
-    rejectedCount: z.number(),
-    acceptedCount: z.number(),
-    missingCriticalCount: z.number()
-  }).optional()
-});"""
-
-content = re.sub(r'export const RequirementGraphSchema = z\.object\(\{\n  nodes: z\.array\(ReqNodeSchema\),\n  edges: z\.array\(z\.object\(\{ from: z\.string\(\), to: z\.string\(\) \}\)\)\n\}\);', replacement_graph, content)
+content = re.sub(r'  confidence: z\.number\(\)\.optional\(\),\n  source: z\.string\(\)\.optional\(\),\n  reason: z\.string\(\)\.optional\(\),\n  text: z\.string\(\)\.optional\(\),\n  status: z\.enum\(\["accepted", "needs user clarification", "rejected"\]\)\.optional\(\),\n  duplicateCount: z\.number\(\)\.optional\(\)', replacement_req, content)
 
 with open('src/compiler/models/domain.ts', 'w') as f:
     f.write(content)

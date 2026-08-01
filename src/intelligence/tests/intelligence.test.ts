@@ -156,8 +156,8 @@ async function runTests() {
   const noReactConf = conflictRes.reqs.nodes.find(n => n.text === "Do not use React.");
   assert.ok(reactConf);
   assert.ok(noReactConf);
-  assert.strictEqual(reactConf.status, "needs user clarification");
-  assert.strictEqual(noReactConf.status, "needs user clarification");
+  assert.strictEqual(reactConf.status, "Conflict");
+  assert.strictEqual(noReactConf.status, "Conflict");
   assert.strictEqual(conflictRes.reqs.metrics.conflictCount > 0, true);
 
   // Test: Explicit React
@@ -173,7 +173,7 @@ async function runTests() {
   assert.ok(begReq);
   assert.strictEqual(begReq.category, "Implicit");
   assert.strictEqual(begReq.confidence > 70 && begReq.confidence < 95, true);
-  assert.strictEqual(begReq.reason, "User indicated beginner audience");
+  assert.strictEqual(begReq.reason, "The user identified themselves as a beginner.");
 
   // Test: Hallucinated PostgreSQL
   const pgRes = await testIntelligence("Build a simple calculator.", "");
@@ -181,7 +181,7 @@ async function runTests() {
   assert.ok(pgReq);
   assert.strictEqual(pgReq.category, "Rejected");
   assert.strictEqual(pgReq.confidence < 40, true);
-  assert.strictEqual(pgReq.status, "rejected");
+  assert.strictEqual(pgReq.status, "Rejected");
   assert.strictEqual(pgReq.reason, "No supporting evidence.");
 
   // Test: Empty prompt
@@ -198,7 +198,7 @@ async function runTests() {
   const codeImplicit = codeRes.reqs.nodes.find(n => n.text === "Must adhere to standard coding conventions");
   assert.ok(codeImplicit);
   assert.strictEqual(codeImplicit.category, "Implicit");
-  assert.strictEqual(codeImplicit.status, "accepted");
+  assert.strictEqual(codeImplicit.status, "Accepted");
 
 
   console.log("Rule Intelligence integration test passed successfully.");
