@@ -1,3 +1,4 @@
+import { PromptExplainabilityEngine } from "../../compiler/core/explainabilityEngine";
 import { PromptGraphBuilder } from "../../compiler/core/promptGraph";
 import { PromptKnowledgeEngine } from "../../compiler/core/knowledgeEngine";
 import { PromptQualityAnalyzer } from "../../compiler/core/promptAnalyzer";
@@ -346,6 +347,27 @@ async function runTests() {
   assert.ok(jsonGraph.nodes.length > 0);
 
   console.log("Prompt Graph Engine Tests passed.");
+
+  
+  // === PHASE 5: PROMPT EXPLAINABILITY ENGINE TESTS ===
+  console.log("Starting Prompt Explainability Engine Tests...");
+  const explainabilityEngine = new PromptExplainabilityEngine();
+  
+  // Test: Normalization, Duplicate, Conflict, Accepted, Rejected, Missing Info
+  explainabilityEngine.generateExplanations(dupRes.ctx, dupRes.reqs, dupGraph);
+  explainabilityEngine.generateExplanations(conflictRes3.ctx, conflictRes3.reqs, conflictGraph);
+  explainabilityEngine.generateExplanations(pgRes.ctx, pgRes.reqs, null as any); // pgRes has Rejected requirement
+  
+  const log = explainabilityEngine.getDecisionLog();
+  assert.ok(log.length > 0);
+  assert.ok(explainabilityEngine.getRejectedItems().length > 0); // pgRes Rejected
+  assert.ok(explainabilityEngine.getConflicts().length > 0); // conflictRes3 Conflict
+  assert.ok(log.some(d => d.decision === "Duplicate Removal")); // dupRes Duplicate Removal
+  
+  const changeHist = explainabilityEngine.getChangeHistory();
+  assert.ok(changeHist.length > 0);
+  
+  console.log("Prompt Explainability Engine Tests passed.");
 
   console.log("Rule Intelligence integration test passed successfully.");
 }
