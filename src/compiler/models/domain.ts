@@ -37,13 +37,24 @@ export const ReqNodeSchema = z.object({
   category: z.enum(["Explicit", "Implicit", "Optional", "Rejected"]).optional(),
   confidence: z.number().optional(),
   source: z.string().optional(),
-  reason: z.string().optional()
+  reason: z.string().optional(),
+  text: z.string().optional(),
+  status: z.enum(["accepted", "needs user clarification", "rejected"]).optional(),
+  duplicateCount: z.number().optional()
 });
 export type ReqNode = z.infer<typeof ReqNodeSchema>;
 
 export const RequirementGraphSchema = z.object({
   nodes: z.array(ReqNodeSchema),
-  edges: z.array(z.object({ from: z.string(), to: z.string() }))
+  edges: z.array(z.object({ from: z.string(), to: z.string() })),
+  metrics: z.object({
+    requirementCoverage: z.number(),
+    conflictCount: z.number(),
+    duplicateCount: z.number(),
+    rejectedCount: z.number(),
+    acceptedCount: z.number(),
+    missingCriticalCount: z.number()
+  }).optional()
 });
 export type RequirementGraph = z.infer<typeof RequirementGraphSchema>;
 
