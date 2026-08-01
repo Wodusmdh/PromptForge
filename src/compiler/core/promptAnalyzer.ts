@@ -1,4 +1,5 @@
 import { RequestContext, RequirementGraph } from "../models/domain";
+import { PromptKnowledgeEngine, MatchedRule } from "./knowledgeEngine";
 
 export interface DimensionScore {
   score: number;
@@ -22,35 +23,47 @@ export interface PromptQualityReport {
 }
 
 export class PromptQualityAnalyzer {
+  private knowledgeEngine: PromptKnowledgeEngine;
+
+  constructor() {
+    this.knowledgeEngine = new PromptKnowledgeEngine();
+  }
+
   public analyze(context: RequestContext, reqs: RequirementGraph): PromptQualityReport {
     const text = context.normalizedText || "";
-    
     const dimensionScores: Record<string, DimensionScore> = {};
     const improvementSuggestions: ImprovementSuggestion[] = [];
     const missingComponents: string[] = [];
     let conflicts: any[] = [];
     const ambiguities: string[] = [];
+
+    const evalResult = this.knowledgeEngine.evaluate(context, reqs);
     
+    // Helper to check if a rule fired
+    const getMatchedRule = (id: string): MatchedRule | undefined => {
+      return evalResult.matchedRules.find(r => r.id === id);
+    };
+
     // 1. Objective Clarity
-    const actionVerbs = ["build", "write", "explain", "translate", "create", "generate"];
-    const foundVerb = actionVerbs.find(v => text.includes(v));
-    if (foundVerb) {
-      dimensionScores["Objective Clarity"] = { score: 96, reason: "Clear action verb detected.", evidence: `"${foundVerb}"` };
+    const objectiveRule = getMatchedRule("objective_required");
+    if (!objectiveRule) {
+      dimensionScores["Objective Clarity"] = { score: 96, reason: "Clear action verb detected.", evidence: "Action verb present." };
     } else {
       dimensionScores["Objective Clarity"] = { score: 30, reason: "No clear action verb.", evidence: "None found." };
-      improvementSuggestions.push({ suggestion: "Start with a clear action verb.", reason: "Objective clarity is low." });
+      improvementSuggestions.push({ suggestion: objectiveRule.recommendation, reason: "Objective clarity is low." });
       missingComponents.push("Objective");
     }
 
     // 2. Audience Definition
-    if (text.includes("beginner") || text.includes("expert") || text.includes("audience")) {
+    const audienceRule = getMatchedRule("audience_required");
+    if (!audienceRule) {
       dimensionScores["Audience Definition"] = { score: 95, reason: "Audience specified.", evidence: "Audience keyword detected." };
     } else {
       dimensionScores["Audience Definition"] = { score: 18, reason: "No audience specified.", evidence: "None found." };
-      improvementSuggestions.push({ suggestion: "Specify the intended audience.", reason: "Audience score is low." });
+      improvementSuggestions.push({ suggestion: audienceRule.recommendation, reason: "Audience score is low." });
       missingComponents.push("Audience");
     }
-    
+
     // 3. Context Completeness
     if (text.length > 50 || text.includes("api")) {
       dimensionScores["Context Completeness"] = { score: 85, reason: "Adequate context length.", evidence: "Prompt length > 50 chars or specific topic." };
@@ -60,38 +73,42 @@ export class PromptQualityAnalyzer {
     }
 
     // 4. Output Specification
-    if (text.includes("format") || text.includes("json") || text.includes("markdown") || text.includes("website") || text.includes("app") || text.includes("story") || text.includes("japanese")) {
+    const outputRule = getMatchedRule("output_format_required");
+    if (!outputRule) {
       dimensionScores["Output Specification"] = { score: 90, reason: "Output format detected.", evidence: "Output keyword found." };
     } else {
       dimensionScores["Output Specification"] = { score: 20, reason: "No output format detected.", evidence: "None found." };
-      improvementSuggestions.push({ suggestion: "Define the expected output format.", reason: "No output format detected." });
+      improvementSuggestions.push({ suggestion: outputRule.recommendation, reason: "No output format detected." });
       missingComponents.push("Output Format");
     }
 
     // 5. Examples
-    if (text.includes("example") || text.includes("e.g.")) {
+    const exampleRule = getMatchedRule("examples_missing");
+    if (!exampleRule) {
       dimensionScores["Examples"] = { score: 100, reason: "Examples provided.", evidence: "Example keyword found." };
     } else {
       dimensionScores["Examples"] = { score: 0, reason: "No examples provided.", evidence: "None found." };
       missingComponents.push("Examples");
     }
-    
+
     // 6. Tone Definition
+    const writingRule = getMatchedRule("writing_guidelines");
     if (text.includes("tone") || text.includes("professional") || text.includes("friendly") || text.includes("horror")) {
       dimensionScores["Tone Definition"] = { score: 90, reason: "Tone specified.", evidence: "Tone keyword found." };
     } else {
       dimensionScores["Tone Definition"] = { score: 10, reason: "No tone specified.", evidence: "None found." };
       missingComponents.push("Tone");
     }
-    
+
     // 7. Constraint Coverage
-    if (reqs.nodes.some(n => n.type === "constraint" || n.category === "Explicit")) {
+    const constraintRule = getMatchedRule("constraints_recommended");
+    if (!constraintRule) {
       dimensionScores["Constraint Coverage"] = { score: 80, reason: "Constraints detected.", evidence: "Explicit requirements found." };
     } else {
       dimensionScores["Constraint Coverage"] = { score: 20, reason: "Few constraints detected.", evidence: "No explicit requirements." };
       missingComponents.push("Constraints");
     }
-    
+
     // 8. Ambiguity
     const vagueWords = ["good", "better", "fast", "modern", "professional", "high quality"];
     const foundVague = vagueWords.filter(w => text.includes(w));
@@ -101,17 +118,17 @@ export class PromptQualityAnalyzer {
     } else {
       dimensionScores["Ambiguity"] = { score: 100, reason: "No vague wording detected.", evidence: "None found." };
     }
-    
+
     // 9. Conflicting Instructions
-    if (reqs.metrics?.conflictCount && reqs.metrics.conflictCount > 0) {
+    if (reqs && reqs.metrics?.conflictCount && reqs.metrics.conflictCount > 0) {
       dimensionScores["Conflicting Instructions"] = { score: 20, reason: "Conflicts detected.", evidence: `${reqs.metrics.conflictCount} conflicts` };
       conflicts = reqs.nodes.filter(n => n.status === "Conflict");
     } else {
       dimensionScores["Conflicting Instructions"] = { score: 100, reason: "No conflicts detected.", evidence: "None found." };
     }
-    
+
     // 10. Missing Information
-    const missingNodes = reqs.nodes.filter(n => n.status === "Missing Information");
+    const missingNodes = reqs ? reqs.nodes.filter(n => n.status === "Missing Information") : [];
     if (missingNodes.length > 0) {
       dimensionScores["Missing Information"] = { score: 30, reason: "Missing info detected.", evidence: `${missingNodes.length} missing items` };
     } else {
@@ -124,10 +141,10 @@ export class PromptQualityAnalyzer {
     if (dimensionScores["Audience Definition"].score < 50) riskScore -= 20;
     if (dimensionScores["Output Specification"].score < 50) riskScore -= 20;
     if (ambiguities.length > 0) riskScore -= 20;
-    
+
     dimensionScores["Hallucination Risk"] = { score: Math.max(0, riskScore), reason: "Based on context, audience, scope, ambiguity.", evidence: "Calculated risk." };
     const hallucinationRisk = dimensionScores["Hallucination Risk"];
-    
+
     // 12. Instruction Consistency
     dimensionScores["Instruction Consistency"] = { score: dimensionScores["Conflicting Instructions"].score, reason: "Based on conflicts.", evidence: dimensionScores["Conflicting Instructions"].evidence };
 
@@ -138,7 +155,7 @@ export class PromptQualityAnalyzer {
       total += dimensionScores[key].score;
       count++;
     }
-    
+
     let overallScore = count > 0 ? Math.round(total / count) : 0;
     if (text === "hello" || text.includes("hello")) { overallScore = 15; }
 
