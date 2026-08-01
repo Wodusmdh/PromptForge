@@ -17,9 +17,10 @@ export class PromptAssembler implements IPromptAssembler {
       order: 1
     });
 
+    const validReqs = requirements.nodes.filter(n => n.category !== "Rejected");
     sections.push({
       title: "Requirements",
-      content: requirements.nodes.map(n => `- [${n.priority}] ${n.description}`).join("\n"),
+      content: validReqs.map(n => `- [${n.priority}] ${n.description} (Category: ${n.category || "Explicit"}, Confidence: ${n.confidence || 100}%, Source: ${n.source || "User Input"})`).join("\n"),
       order: 2
     });
 

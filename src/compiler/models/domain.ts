@@ -15,6 +15,7 @@ export type RequestContext = z.infer<typeof RequestContextSchema>;
 export const IntentNodeSchema = z.object({
   id: z.string(),
   type: z.enum(["primary", "secondary"]),
+  intent: z.enum(["Coding", "Writing", "Translation", "Summarization", "Research", "Education", "Business", "Marketing", "Analysis", "Image Generation", "Video Generation", "Roleplay", "Mathematics", "General", "Unknown"]).optional(),
   description: z.string(),
   confidence: z.number().min(0).max(1)
 });
@@ -32,7 +33,11 @@ export const ReqNodeSchema = z.object({
   type: z.enum(["functional", "non-functional", "constraint", "assumption", "missing"]),
   description: z.string(),
   priority: z.enum(["high", "medium", "low"]),
-  dependencies: z.array(z.string())
+  dependencies: z.array(z.string()),
+  category: z.enum(["Explicit", "Implicit", "Optional", "Rejected"]).optional(),
+  confidence: z.number().optional(),
+  source: z.string().optional(),
+  reason: z.string().optional()
 });
 export type ReqNode = z.infer<typeof ReqNodeSchema>;
 
