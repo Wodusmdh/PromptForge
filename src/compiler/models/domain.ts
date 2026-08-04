@@ -42,7 +42,8 @@ export const ReqNodeSchema = z.object({
   origin: z.string().optional(),
   text: z.string().optional(),
   status: z.enum(["Accepted", "Optional", "Rejected", "Conflict", "Missing Information", "accepted", "needs user clarification", "rejected"]).optional(),
-  duplicateCount: z.number().optional()
+  duplicateCount: z.number().optional(),
+  source_quote: z.string().optional().default("") // The exact substring from the user's prompt that justifies this requirement
 });
 export type ReqNode = z.infer<typeof ReqNodeSchema>;
 

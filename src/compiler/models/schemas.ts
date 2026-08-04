@@ -30,9 +30,10 @@ export type ParsedIntent = z.infer<typeof ParsedIntentSchema>;
 // 3. Requirement
 export const RequirementSchema = z.object({
   id: z.string(),
-  type: z.enum(["Functional", "Non-Functional", "Security", "Performance"]),
+  type: z.enum(["Functional", "Non-Functional", "Security", "Performance"]).optional(),
   description: z.string(),
-  priority: z.enum(["Must-Have", "Should-Have", "Could-Have"]),
+  source_quote: z.string(), // The exact substring from the user's prompt that justifies this requirement
+  priority: z.enum(["Must-Have", "Should-Have", "Could-Have"]).optional(),
   dependencies: z.array(z.string()).default([]), // IDs of other requirements
 });
 export type Requirement = z.infer<typeof RequirementSchema>;

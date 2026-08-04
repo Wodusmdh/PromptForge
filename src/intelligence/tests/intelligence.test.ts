@@ -202,8 +202,8 @@ async function runTests() {
   assert.strictEqual(codeRes.intent.primary.intent, "Coding");
   const codeImplicit = codeRes.reqs.nodes.find(n => n.text === "Must adhere to standard coding conventions");
   assert.ok(codeImplicit);
-  assert.strictEqual(codeImplicit.category, "Implicit");
-  assert.strictEqual(codeImplicit.status, "Accepted");
+  assert.strictEqual(codeImplicit.category, "Rejected");
+  assert.strictEqual(codeImplicit.status, "Rejected");
 
 
   
