@@ -1,6 +1,6 @@
 import React from "react";
-import { Playground } from "./playground/Playground";
+import { GeminiClone } from "./components/GeminiClone";
 
 export default function App() {
-  return <Playground />;
+  return <GeminiClone />;
 }
